@@ -48,20 +48,42 @@ The `EasyDeploy` project aims to address these challenges in two key ways:
 
 ## Demo test Results
 
-Some test results:
+The following test results showcase the visualized reasoning outcomes of the algorithm and its inference throughput.
+
+- Noted that, the asynchronous inference framework can significantly boost the throughput of certain algorithm models. But the latency of the inference workflow is not improved.
+- The metrics in the table below represent the model's throughput, not its average latency.
 
 ### RK3588
+
+- All results are tested on `Orangepi-5plus 16GB`
+
 | ![1](./assets/rk3588_yolov8_result.jpg) | ![2](./assets/rk3588_nanosam_result.png) |
 |:----------------------------------------:|:----------------------------------------:|
-| **yolov8(int8) test result on rk3588**  | **nanosam(int8) test result on rk 3588** |
+| **yolov8(int8) test result on rk3588**  | **nanosam(int8+fp16) test result on rk 3588** |
 
 |  rk3588   |   sync   |  async   |
 |:---------:|:---------:|:----------------:|
-|  yolov8   |   27.20   |  39.72 (1-npu)   |
-|  yolov8   |   27.20   |  136.509 (3-npu) |
-|  nanosam  |   4.00    |  17.00 (2+2-npu) |
+|  yolov8(int8)   |   27.20   |  39.72 (1-npu)   |
+|  yolov8(int8)   |   27.20   |  136.509 (3-npu) |
+|  nanosam(int8+fp16)  |   4.00    |  17.00 (2+2-npu) |
+
+### Nvidia-GPU
+
+- All results are tested on `NVIDIA GeForce RTX 4060-8G`.
+
+| ![1](./assets/nvidia_gpu_yolov8_result.jpg) | ![2](./assets/nvidia_gpu_rt_detr_result.jpg) |
+|:----------------------------------------:|:----------------------------------------:|
+| **yolov8(fp16) test result on nvidia-gpu**  | **rt-detr(fp32) test result on nvidia-gpu** |
+| ![3](./assets/nvidia_gpu_mobilesam_result.png) | ![4](./assets/nvidia_gpu_nanosam_result.png) |
+| **mobilesam(fp32+fp16) test result on nvidia-gpu**  | **nanosam(fp16+fp16) test result on nvidia-gpu** |
 
 
+|  nvidia-gpu   |   sync   |  async   |
+|:---------:|:---------:|:----------------:|
+|  yolov8(fp16)   |   434   |  625   |
+|  rt-detr(int8)   |   142   |  142 |
+|  mobilesam(fp32+fp16)  |   38    |  48 |
+|  nanosam(fp32+fp16)  |   117    |  198 |
 
 ## Getting Started
 
@@ -106,3 +128,5 @@ With these features, EasyDeploy offers the following capabilities:
 ## Todo
 
 - [ ] Use `rga` library on rk3588 to do image pre-process.
+- [ ] Update ONNX-Runtime inference core code and test it out.
+- [ ] Test TensorRT inference framework on jetson platform.
