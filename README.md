@@ -31,22 +31,37 @@ The `EasyDeploy` project aims to address these challenges in two key ways:
 
 2. Asynchronous inference pipeline to improve workflow throughput.  
 
-3. Supporting segmented and distributed model inference, enabling asynchronous inference across devices such as CPU, GPU, APU, and NPU.
+3. Supporting segmented and distributed model inference, enabling asynchronous inference across devices such as CPU, GPU and NPU.
 
 ### Models and Inference Frameworks Supported 
 
 - **Deployed Inference Frameworks**:  
   1. TensorRT  
-  2. ONNX Runtime  
-  3. RKNN  
+  2. ONNX-Runtime  
+  3. RKNN
 
 - **Deployed Algorithms**:  
   1. YOLOv8  
   2. RT-DETR  
   3. MobileSAM  
-  4. NanoSAM  
-  5. MixFormerV2  
-  6. FoundationPose
+  4. NanoSAM
+
+## Demo test Results
+
+Some test results:
+
+### RK3588
+| ![1](./assets/rk3588_yolov8_result.jpg) | ![2](./assets/rk3588_nanosam_result.png) |
+|:----------------------------------------:|:----------------------------------------:|
+| **yolov8(int8) test result on rk3588**  | **nanosam(int8) test result on rk 3588** |
+
+|  rk3588   |   sync   |  async   |
+|:---------:|:---------:|:----------------:|
+|  yolov8   |   27.20   |  39.72 (1-npu)   |
+|  yolov8   |   27.20   |  136.509 (3-npu) |
+|  nanosam  |   4.00    |  17.00 (2+2-npu) |
+
+
 
 ## Getting Started
 
@@ -89,3 +104,5 @@ With these features, EasyDeploy offers the following capabilities:
     - If you need to implement simple segmented, distributed, asynchronous inference for algorithms, the abstract base classes and asynchronous pipeline features provided in EasyDeploy make it easy to achieve this functionality.
 
 ## Todo
+
+- [ ] Use `rga` library on rk3588 to do image pre-process.
