@@ -8,11 +8,13 @@ Before this, you should follow [Setup](./EnviromentSetup.md)
 
 ### 0.1 Download all onnx model
   - All `onnx` models could be downloaded from [goolge driver](https://drive.google.com/drive/folders/1yVEOzo59aob_1uXwv343oeh0dTKuHT58?usp=drive_link).
+  - Put all onnx models into `EasyDeploy/models` directory.
 
 ### 0.2 Convert models
   - Use `tools/cvt_onnx2*_all.sh` scripts to convert onnx models.
   ```bash
-  bash tools/cvt_onnx2rknn.sh
+  bash tools/cvt_onnx2rknn_all.sh
+  # bash tools/cvt_onnx2trt_all.sh
   ```
 ### 0.3 Run demo
   - Build and run simple_tests demo. See test cases for detail.
@@ -26,6 +28,7 @@ Before this, you should follow [Setup](./EnviromentSetup.md)
     ./bin/simple_tests --gtest_filter=*yolo*correctness
     # test on yolo speed
     GLOG_minloglevel=1 ./bin/simple_tests --gtest_filter=*yolo*speed
+    # for other tests, please see `EasyDeploy/simple_tests/src/`
   ```
 
 
