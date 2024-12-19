@@ -1,11 +1,11 @@
 import sys
 from rknn.api import RKNN
 # onnx model path
-onnx_model_path = '/workspace/models/modified_mobile_sam_box_single.onnx'
+onnx_model_path = '/workspace/models/modified_mobile_sam_box.onnx'
 # quant data
 DATASET_PATH = '/workspace/test_data/quant_data/dataset.txt'
 # output path
-DEFAULT_RKNN_PATH = '/workspace/models/modified_mobile_sam_box_single.rknn'
+DEFAULT_RKNN_PATH = '/workspace/models/modified_mobile_sam_box.rknn'
 
 if __name__ == '__main__':
     # Create RKNN object
