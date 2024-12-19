@@ -24,7 +24,7 @@ std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
                                                       "338", "onnx::ReduceSum_346", "350",
                                                       "357", "onnx::ReduceSum_365", "369"};
 
-  auto infer_core_factory = CreateRknnInferCoreFactory(model_path);
+  auto infer_core_factory = CreateRknnInferCoreFactory(model_path, {}, 5, 3);
   auto preprocess_factory = CreateCpuDetPreProcessFactory({0, 0, 0}, {1, 1, 1}, false, false);
   auto postprocess_factory =
       CreateYolov8PostProcessCpuDivideFactory(input_height, input_width, cls_number);

@@ -15,9 +15,10 @@ float test_func_infer_core_speed(std::shared_ptr<BaseInferCore> core)
   return fps_counter.GetFPS();
 }
 
-float test_func_yolov8_model_speed(std::shared_ptr<BaseDetectionModel> model)
+float test_func_yolov8_model_speed(std::shared_ptr<BaseDetectionModel> model,
+                                   std::string                         test_image_path)
 {
-  cv::Mat    fake_image = cv::imread("./persons.jpg");
+  cv::Mat    fake_image = cv::imread(test_image_path);
   FPSCounter fps_counter;
   fps_counter.Start();
   for (int i = 0; i < 500; ++i)
@@ -58,7 +59,7 @@ float test_func_yolov8_model_pipeline_speed(std::shared_ptr<BaseDetectionModel> 
                                             std::string                         test_image_path)
 {
   model->InitPipeline();
-  cv::Mat fake_image = cv::imread("./persons.jpg");
+  cv::Mat fake_image = cv::imread(test_image_path);
 
   BlockQueue<std::shared_ptr<std::future<std::vector<BBox2D>>>> future_bq(100);
 
@@ -166,7 +167,10 @@ void test_func_sam_point_correctness(std::shared_ptr<BaseSamModel> model,
   cv::Mat masks;
   model->GenerateMask(image_test, {{225, 370}}, std::vector<int>{1}, masks, false);
 
-  cv::imwrite(test_results_save_path, masks);
+  ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
+  helper.addRedMaskToForeground(masks);
+
+  cv::imwrite(test_results_save_path, *helper.getImage());
 }
 
 void test_func_sam_box_correctness(std::shared_ptr<BaseSamModel> model,
@@ -177,7 +181,10 @@ void test_func_sam_box_correctness(std::shared_ptr<BaseSamModel> model,
   cv::Mat masks;
   model->GenerateMask(image_test, {{225, 370, 110, 300}}, masks);
 
-  cv::imwrite(test_results_save_path, masks);
+  ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
+  helper.addRedMaskToForeground(masks);
+
+  cv::imwrite(test_results_save_path, *helper.getImage());
 }
 
 void test_func_sam_point_pipeline_correctness(std::shared_ptr<BaseSamModel> model,
@@ -193,7 +200,10 @@ void test_func_sam_point_pipeline_correctness(std::shared_ptr<BaseSamModel> mode
     auto fut = model->GenerateMaskAsync(image_test, {{225, 370}}, std::vector<int>{1});
 
     cv::Mat masks = fut.get();
-    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", masks);
+    ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
+    helper.addRedMaskToForeground(masks);
+
+    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", *helper.getImage());
   }
 }
 
@@ -210,7 +220,10 @@ void test_func_sam_box_pipeline_correctness(std::shared_ptr<BaseSamModel> model,
     auto fut = model->GenerateMaskAsync(image_test, {{225, 370, 110, 300}});
 
     cv::Mat masks = fut.get();
-    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", masks);
+    ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
+    helper.addRedMaskToForeground(masks);
+
+    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", *helper.getImage());
   }
 }
 
