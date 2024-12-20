@@ -81,9 +81,9 @@ The following test results showcase the visualized reasoning outcomes of the alg
 |  nvidia-gpu   |   sync   |  async   |
 |:---------:|:---------:|:----------------:|
 |  yolov8(fp16)   |   434   |  625   |
-|  rt-detr(int8)   |   142   |  142 |
+|  rt-detr(fp32)   |   142   |  142 |
 |  mobilesam(fp32+fp16)  |   38    |  48 |
-|  nanosam(fp32+fp16)  |   117    |  198 |
+|  nanosam(fp16+fp16)  |   117    |  198 |
 
 ## Getting Started
 
@@ -113,11 +113,11 @@ With these features, EasyDeploy offers the following capabilities:
 
 - **Deploying a new algorithm efficiently**:
     - If you need to deploy a new algorithm without worrying about the specific implementation details of inference frameworks, or if you want to easily migrate your algorithm to other inference frameworks, the BaseInferCore abstract base class can help you quickly implement and migrate the algorithm.
-    - [HowToDeployModels](doc/HowToDeployModels.md) my help.
+    - [HowToDeployModels](doc/HowToDeployModels.md) may help.
 
 - **Migrating algorithms to a new inference framework**:
     - If you want to migrate algorithms based on BaseInferCore to a new inference framework, implementing a subclass of BaseInferCore will allow you to migrate all algorithms to the new framework with ease.
-    - [HowToDeployModels](doc/HowToDeployModels.md) my help.
+    - [HowToDeployModels](doc/HowToDeployModels.md) may help.
 
 - **Improving inference throughput**:
     - If you need to increase the throughput of algorithm inference, EasyDeploy provides an asynchronous inference pipeline. For certain algorithm types (e.g., 2D detection, SAM), asynchronous base classes are already available, enabling you to boost the throughput of your models with minimal effort.
