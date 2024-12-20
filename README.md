@@ -85,6 +85,24 @@ The following test results showcase the visualized reasoning outcomes of the alg
 |  mobilesam(fp32+fp16)  |   38    |  48 |
 |  nanosam(fp16+fp16)  |   117    |  198 |
 
+
+### OnnxRuntime
+
+- All results are tested on `RK3588 CPU`
+
+| ![1](./assets/onnxruntime_yolov8_result.jpg) | ![2](./assets/onnxruntime_rt_detr_result.jpg) |
+|:----------------------------------------:|:----------------------------------------:|
+| **yolov8(fp32) test result on rk3588-cpu**  | **rt-detr(fp32) test result on rk3588-cpu** |
+| ![3](./assets/onnxruntime_mobilesam_result.png) | ![4](./assets/onnxruntime_nano_result.png) |
+| **mobilesam(fp32+fp32) test result on rk3588-cpu**  | **nanosam(fp32+fp32) test result on rk3588-cpu** |
+
+|  rk3588-cpu   |   sync   |  async   |
+|:---------:|:---------:|:----------------:|
+|  yolov8(fp32)   |   6.3   |  6.3   |
+|  rt-detr(fp32)   |   1.17   |  1.17 |
+|  mobilesam(fp32+fp32)  |   0.57    |  0.57 |
+|  nanosam(fp32+fp32)  |   0.87    |  0.87 |
+
 ## Getting Started
 
 ### Dependency
@@ -128,5 +146,5 @@ With these features, EasyDeploy offers the following capabilities:
 ## Todo
 
 - [ ] Use `rga` library on rk3588 to do image pre-process.
-- [ ] Update ONNX-Runtime inference core code and test it out.
+- [x] Update ONNX-Runtime inference core code and test it out.
 - [ ] Test TensorRT inference framework on jetson platform.

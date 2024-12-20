@@ -12,7 +12,6 @@
 
 namespace inference_core {
 
-
 enum RknnInputTensorType {
   RK_UINT8,
   RK_INT8,
@@ -23,7 +22,6 @@ enum RknnInputTensorType {
   RK_INT64
 };
 
-
 std::shared_ptr<BaseInferCore> CreateRknnInferCore(
     std::string                                                 model_path,
     const std::unordered_map<std::string, RknnInputTensorType> &map_blob_type    = {},
@@ -31,11 +29,11 @@ std::shared_ptr<BaseInferCore> CreateRknnInferCore(
     const int                                                   parallel_ctx_num = 1);
 
 std::shared_ptr<BaseInferCoreFactory> CreateRknnInferCoreFactory(
-    std::string                                                  model_path,
+    std::string                                                 model_path,
     const std::unordered_map<std::string, RknnInputTensorType> &map_blob_type    = {},
     const int                                                   mem_buf_size     = 5,
     const int                                                   parallel_ctx_num = 1);
-    
+
 } // namespace inference_core
 
 #endif
