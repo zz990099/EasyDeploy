@@ -12,6 +12,7 @@ using namespace inference_core;
 using namespace detection_2d;
 using namespace sam;
 
+static
 std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
 {
   std::string                    model_path       = "/workspace/models/yolov8n_divide_opset11.rknn";
@@ -34,6 +35,7 @@ std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
       input_channels, cls_number, input_blobs_name, output_blobs_name);
 }
 
+static
 std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
 {
   auto image_encoder_model_path = "/workspace/models/nanosam_image_encoder_opset11.rknn";

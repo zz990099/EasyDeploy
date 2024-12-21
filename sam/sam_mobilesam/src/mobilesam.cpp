@@ -17,7 +17,7 @@ static void CheckBlobNameMatched(const std::string &infer_core_name,
   auto blob_buffer = infer_core->AllocBlobsBuffer();
   if (blob_names.size() != blob_buffer->Size())
   {
-    ThrowRuntimeError(infer_core_name + " core got different blob size with blob_names input!" +
+    ThrowRuntimeError(infer_core_name + " core got different blob size with blob_names input! " +
                           std::to_string(blob_buffer->Size()) + " vs " +
                           std::to_string(blob_names.size()),
                       __LINE__);

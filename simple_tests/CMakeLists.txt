@@ -49,7 +49,7 @@ if(ENABLE_RKNN)
 endif()
 
 if(ENABLE_ORT)
-  list(APPEND source_file src/test_x86_devkit.cpp)
+  list(APPEND source_file src/test_cpu_devkit.cpp)
 endif()
 
 enable_testing()

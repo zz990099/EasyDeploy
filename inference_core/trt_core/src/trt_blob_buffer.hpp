@@ -15,7 +15,7 @@
 namespace inference_core {
 
 template <typename Type>
-static Type CumVector(const std::vector<Type> &vec)
+inline Type CumVector(const std::vector<Type> &vec)
 {
   Type ret = 1;
   for (const auto &nn : vec)
@@ -27,7 +27,7 @@ static Type CumVector(const std::vector<Type> &vec)
 }
 
 template <typename Type>
-std::string VisualVec(const std::vector<Type> &vec)
+inline std::string VisualVec(const std::vector<Type> &vec)
 {
   std::string ret;
   for (const auto &v : vec)
