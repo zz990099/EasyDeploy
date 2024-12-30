@@ -126,7 +126,7 @@ Additionally, EasyDeploy provides an asynchronous inference pipeline to further 
 With these features, EasyDeploy offers the following capabilities:
 
 - **Direct use of pre-implemented algorithms**:
-    - If you need to directly use algorithms such as YOLOv8, RT-DETR, MobileSAM, NanoSAM, MixFormer, or FoundationPose, EasyDeploy has already implemented and optimized their deployment.
+    - If you need to directly use algorithms such as YOLOv8, RT-DETR, MobileSAM or NanoSAM, EasyDeploy has already implemented and optimized their deployment.
     - [QuickStart](doc/QuickStart.md) may help.
 
 - **Deploying a new algorithm efficiently**:
