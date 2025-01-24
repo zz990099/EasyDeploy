@@ -147,4 +147,4 @@ With these features, EasyDeploy offers the following capabilities:
 
 - [ ] Use `rga` library on rk3588 to do image pre-process.
 - [x] Update ONNX-Runtime inference core code and test it out.
-- [ ] Test TensorRT inference framework on jetson platform.
+- [x] Test TensorRT inference framework on jetson platform.
