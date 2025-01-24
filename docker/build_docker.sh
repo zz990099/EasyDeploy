@@ -58,11 +58,11 @@ build_rk3588_image() {
 }
 
 build_jetson_image() {
-  BUILT_IMAGE_TAG=${IMAGE_BASE_NAME}:jetson_tensorrt_u2204
+  BUILT_IMAGE_TAG=${IMAGE_BASE_NAME}:jetson_tensorrt_u2004
   if is_image_exist ${BUILT_IMAGE_TAG}; then
     echo Image: ${BUILT_IMAGE_TAG} exists! Skip image building process ...
   else
-    docker build -f jetson_tensorrt_u2204.dockerfile -t ${BUILT_IMAGE_TAG} . 
+    docker build -f jetson_tensorrt_u2004.dockerfile -t ${BUILT_IMAGE_TAG} . 
   fi
 }
 
