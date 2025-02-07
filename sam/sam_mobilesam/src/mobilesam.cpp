@@ -2,6 +2,9 @@
 
 #include "deploy_core/wrapper.h"
 
+#include "device_utils/arm_device_util.h"
+#include <sched.h>
+
 namespace sam {
 
 static void ThrowRuntimeError(const std::string &hint, uint64_t line_num)
@@ -35,8 +38,38 @@ static void CheckBlobNameMatched(const std::string &infer_core_name,
   }
 }
 
+// Bind transpose processing to big core
+static void bind_to_big_core() {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+
+    CPU_SET(4, &mask);
+    CPU_SET(5, &mask);
+    CPU_SET(6, &mask);
+    CPU_SET(7, &mask);
+
+    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+        perror("sched_setaffinity failed");
+    }
+}
+
+// Unbind 
+static void unbind_from_big_core() {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    for (int i = 0; i < sysconf(_SC_NPROCESSORS_ONLN); ++i) {
+        CPU_SET(i, &mask);
+    }
+    sched_setaffinity(0, sizeof(mask), &mask);
+    sched_yield(); 
+}
+
+
 static void rknn_nchw_2_nhwc(float *nchw, float *nhwc, int N, int C, int H, int W)
 {
+  // only neccessary on `rk3588` platform.
+  bind_to_big_core();
+
   for (int ni = 0; ni < N; ni++)
   {
     for (int hi = 0; hi < H; hi++)
@@ -51,6 +84,8 @@ static void rknn_nchw_2_nhwc(float *nchw, float *nhwc, int N, int C, int H, int 
       }
     }
   }
+
+  unbind_from_big_core();
 }
 
 class MobileSam : public BaseSamModel {
