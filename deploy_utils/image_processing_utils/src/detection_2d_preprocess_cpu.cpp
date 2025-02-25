@@ -59,15 +59,18 @@ float DetPreProcessCPU::Preprocess(
   int         fix_height, fix_width;
   float       scale;
 
-  if (image_height > image_width)
+  const float s_w = static_cast<float>(dst_width) / image_width;
+  const float s_h = static_cast<float>(dst_height) / image_height;
+
+  if (s_h < s_w)
   {
     fix_height = dst_height;
-    scale      = dst_height / static_cast<float>(image_height);
+    scale      = s_h;
     fix_width  = static_cast<int>(image_width * scale);
   } else
   {
     fix_width  = dst_width;
-    scale      = dst_width / static_cast<float>(image_width);
+    scale      = s_w;
     fix_height = static_cast<int>(image_height * scale);
   }
 
