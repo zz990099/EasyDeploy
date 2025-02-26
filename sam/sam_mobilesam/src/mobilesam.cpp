@@ -2,7 +2,6 @@
 
 #include "deploy_core/wrapper.h"
 
-#include "device_utils/arm_device_util.h"
 #include <sched.h>
 
 namespace sam {
