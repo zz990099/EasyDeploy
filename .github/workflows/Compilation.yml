@@ -1,0 +1,71 @@
+name: Compilation
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  nvidia_gpu_tensorrt:
+    name: 'NvidiaGpuTensorRT'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/teddywesside1/easy_deploy_base_dev:nvidia_gpu_tensorrt_u2204
+      options:
+        --privileged
+        --ipc host
+        -v ${{ github.workspace }}:/workspace
+        -w /workspace
+    steps:
+    - uses: actions/checkout@v4
+    - name: Compile Codes
+      run:
+        cd /workspace && 
+        mkdir build && cd build && 
+        cmake .. -DBUILD_TESTING=ON -DENABLE_TENSORRT=ON -DENABLE_ORT=ON && 
+        make -j
+
+  rk3588:
+    name: 'RK3588'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read  # 访问容器镜像仓库的权限
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 启用 QEMU 虚拟化支持
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    # 初始化多架构构建支持
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # ========== 容器控制阶段 ==========
+    # 登录容器仓库（如果是私有镜像）
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # 启动 ARM64 容器并保持运行
+    - name: Start ARM64 container
+      run: |
+        docker run -d \
+          --name easy_deploy_container \
+          --platform linux/arm64 \
+          -v "$PWD:/workspace" \
+          ghcr.io/teddywesside1/easy_deploy_base_dev:rknn_u2204 \
+          tail -f /dev/null
+
+    # ========== 编译执行阶段 ==========
+    - name: Build project
+      run: |
+        docker exec -w /workspace easy_deploy_container sh -c "mkdir build && cd build && cmake .. -DBUILD_TESTING=ON -DENABLE_RKNN=ON -DENABLE_ORT=ON && make -j"
