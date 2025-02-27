@@ -120,7 +120,7 @@ void DetPreProcessCPU::FlipChannelsWithNorm(const cv::Mat &image, float *dst_ptr
 
   for (int r = 0; r < rows; ++r)
   {
-    size_t offset = (r * cols + r) * 3;
+    size_t offset = (r * cols) * 3;
     for (int c = 0; c < cols; ++c)
     {
       size_t idx       = offset + c * 3;
