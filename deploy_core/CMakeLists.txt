@@ -27,4 +27,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   glog::glog
 ) 
 
+install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION lib)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
