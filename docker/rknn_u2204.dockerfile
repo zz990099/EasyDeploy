@@ -43,7 +43,7 @@ RUN apt-get install -y \
 # use github release proxy speedup
 # see [https://github.com/hunshcn/gh-proxy]
 RUN cd /tmp && \
-  wget https://gh.api.99988866.xyz/https://github.com/airockchip/rknn-toolkit2/archive/refs/tags/v2.3.0.tar.gz
+  wget https://gp.zz990099.cn/https://github.com/airockchip/rknn-toolkit2/archive/refs/tags/v2.3.0.tar.gz
 
 RUN cd /tmp && \
   tar -xzvf v2.3.0.tar.gz && \

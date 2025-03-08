@@ -45,7 +45,7 @@ RUN apt install -y \
 
 # install cmake-3.22.6
 RUN cd /tmp && \
-    wget https://gh.api.99988866.xyz/https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6.tar.gz && \
+    wget https://gp.zz990099.cn/https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6.tar.gz && \
     tar -xzvf cmake-3.22.6.tar.gz && \
     rm cmake-3.22.6.tar.gz
 RUN cd /tmp/cmake-3.22.6/ && \
@@ -55,7 +55,7 @@ RUN cd /tmp/cmake-3.22.6/ && \
 
 # install glog
 RUN cd /tmp && \
-    wget https://gh.api.99988866.xyz/https://github.com/google/glog/archive/refs/tags/v0.5.0.tar.gz && \
+    wget https://gp.zz990099.cn/https://github.com/google/glog/archive/refs/tags/v0.5.0.tar.gz && \
     tar -xzvf v0.5.0.tar.gz && \
     rm v0.5.0.tar.gz
 RUN cd /tmp/glog-0.5.0 && \
@@ -65,7 +65,7 @@ RUN cd /tmp/glog-0.5.0 && \
 
 # install gtest
 RUN cd /tmp && \
-    wget https://gh.api.99988866.xyz/https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz && \
+    wget https://gp.zz990099.cn/https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz && \
     tar -xzvf release-1.11.0.tar.gz && \
     rm release-1.11.0.tar.gz
 RUN cd /tmp/googletest-release-1.11.0 && \
