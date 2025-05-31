@@ -115,11 +115,13 @@ public:
     const int                      input_channels = 3;
     const int                      cls_number     = 80;
     const std::vector<std::string> input_blobs_name  = {"images"};
-    const std::vector<std::string> output_blobs_name = {"output0"};
+    const std::vector<std::string> output_blobs_name = {"318", "onnx::ReduceSum_326", "331",
+                                                      "338", "onnx::ReduceSum_346", "350",
+                                                      "357", "onnx::ReduceSum_365", "369"};
 
     auto infer_core  = CreateRknnInferCore(model_path, {{"images", RknnInputTensorType::RK_UINT8}});
-    auto preprocess  = CreateCpuDetPreProcess({0, 0, 0}, {255, 255, 255}, false, false);
-    auto postprocess = CreateYolov8PostProcessCpuOrigin(input_height, input_width, cls_number);
+    auto preprocess  = CreateCpuDetPreProcess({0, 0, 0}, {1, 1, 1}, false, false);
+    auto postprocess = CreateYolov8PostProcessCpuDivide(input_height, input_width, cls_number);
 
     yolov8_model_ =
         CreateYolov8DetectionModel(infer_core, preprocess, postprocess, input_height, input_width,
