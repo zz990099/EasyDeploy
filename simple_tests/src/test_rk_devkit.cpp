@@ -12,8 +12,7 @@ using namespace inference_core;
 using namespace detection_2d;
 using namespace sam;
 
-static
-std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
+static std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
 {
   std::string                    model_path       = "/workspace/models/yolov8n_divide_opset11.rknn";
   const int                      input_height     = 640;
@@ -35,8 +34,7 @@ std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
       input_channels, cls_number, input_blobs_name, output_blobs_name);
 }
 
-static
-std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
+static std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
 {
   auto image_encoder_model_path = "/workspace/models/nanosam_image_encoder_opset11.rknn";
   auto box_decoder_model_path   = "/workspace/models/modified_mobile_sam_box.rknn";
@@ -45,11 +43,9 @@ std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
   auto image_encoder_factory = CreateRknnInferCoreFactory(
       image_encoder_model_path, {{"images", RknnInputTensorType::RK_UINT8}}, 5, 2);
 
-  auto box_decoder_factory =
-      CreateRknnInferCoreFactory(box_decoder_model_path, {}, 5, 2);
+  auto box_decoder_factory = CreateRknnInferCoreFactory(box_decoder_model_path, {}, 5, 2);
 
-  auto point_decoder_factory =
-      CreateRknnInferCoreFactory(point_decoder_model_path, {}, 5, 2);
+  auto point_decoder_factory = CreateRknnInferCoreFactory(point_decoder_model_path, {}, 5, 2);
 
   auto image_preprocess_factory = CreateCpuDetPreProcessFactory({0, 0, 0}, {1, 1, 1}, false, false);
 

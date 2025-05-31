@@ -10,8 +10,8 @@ DEFAULT_RKNN_PATH = '/workspace/models/nanosam_image_encoder_opset11.rknn'
 if __name__ == '__main__':
     # Create RKNN object
     rknn = RKNN(verbose=False)
-    rknn.config(mean_values=[[123.675, 116.28, 103.53]], 
-                std_values=[[58.395, 57.12, 57.375]], 
+    rknn.config(mean_values=[[123.675, 116.28, 103.53]],
+                std_values=[[58.395, 57.12, 57.375]],
                 target_platform="rk3588",
                 optimization_level=2)
 

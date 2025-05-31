@@ -15,8 +15,7 @@ using namespace inference_core;
 using namespace detection_2d;
 using namespace sam;
 
-static
-std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
+static std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
 {
   std::string                    model_path        = "/workspace/models/yolov8n.onnx";
   const int                      input_height      = 640;
@@ -36,8 +35,7 @@ std::shared_ptr<BaseDetection2DFactory> GetYolov8Factory()
       input_channels, cls_number, input_blobs_name, output_blobs_name);
 }
 
-static
-std::shared_ptr<BaseDetection2DFactory> GetRTDetrFactory()
+static std::shared_ptr<BaseDetection2DFactory> GetRTDetrFactory()
 {
   std::string                    model_path     = "/workspace/models/rt_detr_v2_single_input.onnx";
   const int                      input_height   = 640;
@@ -58,8 +56,7 @@ std::shared_ptr<BaseDetection2DFactory> GetRTDetrFactory()
 const static int SAM_MAX_POINTS = 8;
 const static int SAM_MAX_BOX    = 1;
 
-static
-std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
+static std::shared_ptr<BaseSamFactory> GetMobileSamFactory()
 {
   auto image_encoder_model_path = "/workspace/models/mobile_sam_encoder.onnx";
   // auto image_encoder_model_path = "/workspace/models/nanosam_image_encoder_opset11.onnx";

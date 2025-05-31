@@ -27,9 +27,9 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(test_detection_2d_yolov8 ${source_file})   
+add_executable(test_detection_2d_yolov8 ${source_file})
 
-target_link_libraries(test_detection_2d_yolov8 PUBLIC 
+target_link_libraries(test_detection_2d_yolov8 PUBLIC
   GTest::gtest_main
   glog::glog
   ${OpenCV_LIBS}

@@ -199,11 +199,12 @@ void test_func_sam_point_pipeline_correctness(std::shared_ptr<BaseSamModel> mode
   {
     auto fut = model->GenerateMaskAsync(image_test, {{225, 370}}, std::vector<int>{1});
 
-    cv::Mat masks = fut.get();
+    cv::Mat         masks = fut.get();
     ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
     helper.addRedMaskToForeground(masks);
 
-    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", *helper.getImage());
+    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png",
+                *helper.getImage());
   }
 }
 
@@ -219,11 +220,12 @@ void test_func_sam_box_pipeline_correctness(std::shared_ptr<BaseSamModel> model,
   {
     auto fut = model->GenerateMaskAsync(image_test, {{225, 370, 110, 300}});
 
-    cv::Mat masks = fut.get();
+    cv::Mat         masks = fut.get();
     ImageDrawHelper helper(std::make_shared<cv::Mat>(image_test.clone()));
     helper.addRedMaskToForeground(masks);
 
-    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png", *helper.getImage());
+    cv::imwrite("/workspace/test_data/tests_masks_output_" + std::to_string(i) + ".png",
+                *helper.getImage());
   }
 }
 

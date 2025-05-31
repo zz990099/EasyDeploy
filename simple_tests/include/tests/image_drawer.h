@@ -67,7 +67,6 @@ public:
         }
       }
     }
-
   }
 
   std::shared_ptr<cv::Mat> getImage() const

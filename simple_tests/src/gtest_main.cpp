@@ -5,22 +5,21 @@
 
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
 
-    google::InitGoogleLogging(argv[0]);
+  google::InitGoogleLogging(argv[0]);
 
-    google::SetStderrLogging(google::GLOG_WARNING);
-    FLAGS_logtostderr = false; // 不输出到标准错误
-    FLAGS_log_dir = "./test_log/"; // 指定日志文件存放目录
- 
-    // FLAGS_minloglevel = 0;
-    FLAGS_logtostderr = true;
-    int result = RUN_ALL_TESTS();
+  google::SetStderrLogging(google::GLOG_WARNING);
+  FLAGS_logtostderr = false;         // 不输出到标准错误
+  FLAGS_log_dir     = "./test_log/"; // 指定日志文件存放目录
 
-    google::ShutdownGoogleLogging();
+  // FLAGS_minloglevel = 0;
+  FLAGS_logtostderr = true;
+  int result        = RUN_ALL_TESTS();
 
-    return result;
+  google::ShutdownGoogleLogging();
+
+  return result;
 }
-
-

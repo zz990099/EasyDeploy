@@ -24,7 +24,7 @@ sudo cat /sys/devices/system/cpu/cpufreq/policy6/cpuinfo_cur_freq
 
 # NPU定频
 echo "NPU可用频率/NPU available frequency:"
-sudo cat /sys/class/devfreq/fdab0000.npu/available_frequencies    
+sudo cat /sys/class/devfreq/fdab0000.npu/available_frequencies
 sudo echo userspace > /sys/class/devfreq/fdab0000.npu/governor
 sudo echo 1000000000 > /sys/class/devfreq/fdab0000.npu/userspace/set_freq
 echo "NPU当前频率/NPU current frequency:"

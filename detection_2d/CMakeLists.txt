@@ -3,4 +3,4 @@ project(detection_2d)
 
 
 add_subdirectory(detection_2d_yolov8)
-add_subdirectory(detection_2d_rt_detr)
+# add_subdirectory(detection_2d_rt_detr)

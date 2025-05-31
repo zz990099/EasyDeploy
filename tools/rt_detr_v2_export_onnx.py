@@ -1,8 +1,8 @@
-import os 
-import sys 
+import os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import torch
-import torch.nn as nn 
+import torch.nn as nn
 from src.core import YAMLConfig
 
 def main(args, ):
@@ -11,7 +11,7 @@ def main(args, ):
     cfg = YAMLConfig(args.config, resume=args.resume)
 
     if args.resume:
-        checkpoint = torch.load(args.resume, map_location='cpu') 
+        checkpoint = torch.load(args.resume, map_location='cpu')
         if 'ema' in checkpoint:
             state = checkpoint['ema']['module']
         else:
@@ -27,7 +27,7 @@ def main(args, ):
             super().__init__()
             self.model = cfg.model.deploy()
             self.postprocessor = cfg.postprocessor.deploy()
-            
+
         def forward(self, images, orig_target_sizes):
             outputs = self.model(images)
             return outputs
@@ -36,15 +36,15 @@ def main(args, ):
 
     data = torch.rand(1, 3, 640, 640)
     size = torch.tensor([[640, 640]])
-    
+
     torch.onnx.export(
-        model, 
-        (data, size), 
+        model,
+        (data, size),
         args.output_file,
         input_names=['images', 'orig_target_sizes'],
         output_names=['out1', 'out2'],
         # dynamic_axes=dynamic_axes,
-        opset_version=16, 
+        opset_version=16,
         verbose=False,
         do_constant_folding=True,
     )
@@ -56,9 +56,9 @@ def main(args, ):
         print('Check export onnx model done...')
 
     if args.simplify:
-        import onnx 
+        import onnx
         import onnxsim
-        dynamic = True 
+        dynamic = True
         input_shapes = {'images': data.shape} if dynamic else None
         onnx_model_simplify, check = onnxsim.simplify(args.output_file, input_shapes=input_shapes, dynamic_input_shape=dynamic)
         onnx.save(onnx_model_simplify, args.output_file)

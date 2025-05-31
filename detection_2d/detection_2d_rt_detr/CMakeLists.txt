@@ -19,9 +19,9 @@ include_directories(
 set(source_file src/rt_detr.cpp
                 src/rt_detr_factory.cpp)
 
-add_library(${PROJECT_NAME} SHARED ${source_file})   
+add_library(${PROJECT_NAME} SHARED ${source_file})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC 
+target_link_libraries(${PROJECT_NAME} PUBLIC
   glog::glog
   ${OpenCV_LIBS}
   deploy_core

@@ -52,7 +52,7 @@ static void bind_to_big_core() {
     }
 }
 
-// Unbind 
+// Unbind
 static void unbind_from_big_core() {
     cpu_set_t mask;
     CPU_ZERO(&mask);
@@ -60,7 +60,7 @@ static void unbind_from_big_core() {
         CPU_SET(i, &mask);
     }
     sched_setaffinity(0, sizeof(mask), &mask);
-    sched_yield(); 
+    sched_yield();
 }
 
 
@@ -168,7 +168,7 @@ bool MobileSam::ImagePreProcess(ParsingType package)
                                     is not a instance of `SamPipelinePackage`!");
 
   auto encoder_blobs_buffer = p_package->image_encoder_blobs_buffer;
-  // make the output buffer at device side 
+  // make the output buffer at device side
   // (some inference framework will still output buffer to host side)
   p_package->image_encoder_blobs_buffer->SetBlobBuffer(encoder_blob_names_[1],
                                                        DataLocation::DEVICE);
@@ -215,10 +215,10 @@ bool MobileSam::PromptBoxPreProcess(ParsingType package)
   ////////////////////////////////////////////////////////////////////////////
 
   // Zero-Copy Feature : let decoder use the buffer which encoder outputs
-  // Encoder/Decoder with different infer_core are supported. (if the hardware support) 
+  // Encoder/Decoder with different infer_core are supported. (if the hardware support)
   decoder_map_blob2ptr->SetBlobBuffer(
       box_dec_blob_names_[0], encoder_output.first,
-      encoder_output.second); 
+      encoder_output.second);
 
   // 1. Set prompt
   const auto &boxes = p_package->boxes;
@@ -283,10 +283,10 @@ bool MobileSam::PromptPointPreProcess(ParsingType package)
   ////////////////////////////////////////////////////////////////////////////
 
   // Zero-Copy Feature : let decoder use the buffer which encoder outputs
-  // Encoder/Decoder with different infer_core are supported. (if the hardware support) 
+  // Encoder/Decoder with different infer_core are supported. (if the hardware support)
   decoder_map_blob2ptr->SetBlobBuffer(
       point_dec_blob_names_[0], encoder_output.first,
-      encoder_output.second); 
+      encoder_output.second);
 
   // 1. Set prompt
   const auto &points     = p_package->points;

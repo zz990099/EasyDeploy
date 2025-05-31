@@ -7,10 +7,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(easy_deploy_packages
   deploy_core
-  image_processing_utils  
+  image_processing_utils
 )
 
-set(algorithm_packages 
+set(algorithm_packages
   detection_2d_yolov8
   detection_2d_rt_detr
   sam_mobilesam
@@ -34,7 +34,7 @@ find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 find_package(OpenCV REQUIRED)
 
-set(source_file 
+set(source_file
   # src/gtest_main.cpp
   src/fs_util.cpp
   src/test_func.cpp
@@ -59,9 +59,9 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME} ${source_file})   
+add_executable(${PROJECT_NAME} ${source_file})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC 
+target_link_libraries(${PROJECT_NAME} PUBLIC
   GTest::gtest_main
   glog::glog
   ${OpenCV_LIBS}
