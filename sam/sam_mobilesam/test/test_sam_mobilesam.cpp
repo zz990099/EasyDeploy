@@ -85,7 +85,7 @@ public:
     auto point_decoder_model_path = "/workspace/models/modified_mobile_sam_point.engine";
 
     auto mobilesam_image_encoder = CreateTrtInferCore(mobilesam_image_encoder_model_path);
-    auto nanosam_image_encoder   = CreateTrtInferCore(mobilesam_image_encoder_model_path);
+    auto nanosam_image_encoder   = CreateTrtInferCore(nanosam_image_encoder_model_path);
 
     const int SAM_MAX_BOX    = 1;
     const int SAM_MAX_POINTS = 8;
@@ -157,7 +157,7 @@ public:
     auto point_decoder_model_path         = "/workspace/models/modified_mobile_sam_point.onnx";
 
     auto mobilesam_image_encoder = CreateOrtInferCore(mobilesam_image_encoder_model_path);
-    auto nanosam_image_encoder   = CreateOrtInferCore(mobilesam_image_encoder_model_path);
+    auto nanosam_image_encoder   = CreateOrtInferCore(nanosam_image_encoder_model_path);
 
     const int SAM_MAX_BOX    = 1;
     const int SAM_MAX_POINTS = 8;
@@ -183,7 +183,8 @@ public:
                                   },
                                   {{"masks", {1, 1, 256, 256}}, {"scores", {1, 1}}});
 
-    auto image_preprocess_factory = CreateCpuDetPreProcessFactory({0, 0, 0}, {255, 255, 255}, true, true);
+    auto image_preprocess_factory =
+        CreateCpuDetPreProcessFactory({0, 0, 0}, {255, 255, 255}, true, true);
 
     mobilesam_model_ =
         CreateMobileSamModel(mobilesam_image_encoder, point_decoder_factory->Create(),
@@ -213,5 +214,51 @@ public:
 
 GEN_MOBILESAM_TEST_CASES(onnxruntime, Sam_OnnxRuntime_Fixture);
 GEN_NANOSAM_TEST_CASES(onnxruntime, Sam_OnnxRuntime_Fixture);
+
+#endif
+
+#ifdef ENABLE_RKNN
+
+#include "rknn_core/rknn_core.h"
+
+class Sam_Rknn_Fixture : public BaseSamFixture {
+public:
+  void SetUp() override
+  {
+    auto nanosam_image_encoder_model_path = "/workspace/models/nanosam_image_encoder_opset11.rknn";
+    auto box_decoder_model_path           = "/workspace/models/modified_mobile_sam_box.rknn";
+    auto point_decoder_model_path         = "/workspace/models/modified_mobile_sam_point.rknn";
+
+    auto nanosam_image_encoder = CreateRknnInferCore(
+        nanosam_image_encoder_model_path, {{"images", RknnInputTensorType::RK_UINT8}}, 5, 2);
+
+    auto box_decoder_factory = CreateRknnInferCoreFactory(box_decoder_model_path, {}, 5, 2);
+
+    auto point_decoder_factory = CreateRknnInferCoreFactory(point_decoder_model_path, {}, 5, 2);
+
+    auto image_preprocess_factory =
+        CreateCpuDetPreProcessFactory({0, 0, 0}, {255, 255, 255}, false, false);
+
+    nanosam_model_ =
+        CreateMobileSamModel(nanosam_image_encoder, point_decoder_factory->Create(),
+                             box_decoder_factory->Create(), image_preprocess_factory->Create());
+
+    test_image_path_                        = "/workspace/test_data/persons.jpg";
+    test_mobilesam_visual_result_save_path_ = "/workspace/test_data/mobilesam_rknn_test_result.jpg";
+    test_nanosam_visual_result_save_path_   = "/workspace/test_data/nanosam_rknn_test_result.jpg";
+
+    points_ = {{225, 370}};
+    labels_ = {1};
+
+    BBox2D box;
+    box.x  = 225;
+    box.y  = 370;
+    box.w  = 110;
+    box.h  = 300;
+    boxes_ = {box};
+  }
+};
+
+GEN_NANOSAM_TEST_CASES(rknn, Sam_Rknn_Fixture);
 
 #endif
