@@ -12,7 +12,7 @@ jobs:
     name: 'NvidiaGpuTensorRT'
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/teddywesside1/easy_deploy_base_dev:nvidia_gpu_tensorrt_u2204
+      image: ghcr.io/zz990099/easy_deploy_tool:nvidia_gpu_trt10_u2204
       options:
         --privileged
         --ipc host
@@ -62,7 +62,7 @@ jobs:
           --name easy_deploy_container \
           --platform linux/arm64 \
           -v "$PWD:/workspace" \
-          ghcr.io/teddywesside1/easy_deploy_base_dev:rknn_u2204 \
+          ghcr.io/zz990099/easy_deploy_tool:rknn_230_u2204 \
           tail -f /dev/null
 
     # ========== 编译执行阶段 ==========
