@@ -97,7 +97,7 @@ bash easy_deploy_tool/docker/into_docker.sh
 
 ### Compile Codes
 
-Inside the Docker container, compile the project. Use the `-DENABLE_*` flags to enable specific inference frameworks. Available options: `-DENABLE_TENSORRT=ON`, `-DENABLE_ORT=ON`, `-DENABLE_RKNN=ON` (compatible with each other). 
+Inside the Docker container, compile the project. Use the `-DENABLE_*` flags to enable specific inference frameworks. Available options: `-DENABLE_TENSORRT=ON`, `-DENABLE_ORT=ON`, `-DENABLE_RKNN=ON` (compatible with each other).
 ```bash
 cd /workspace
 mdkir build && cd build
