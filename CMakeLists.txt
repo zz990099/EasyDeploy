@@ -9,3 +9,4 @@ endif()
 
 add_subdirectory(easy_deploy_tool)
 add_subdirectory(detection_2d)
+add_subdirectory(sam)

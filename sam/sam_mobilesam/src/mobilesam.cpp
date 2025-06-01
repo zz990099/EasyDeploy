@@ -3,6 +3,7 @@
 #include "deploy_core/wrapper.h"
 
 #include <sched.h>
+#include <unistd.h>
 
 namespace sam {
 
@@ -16,11 +17,11 @@ static void CheckBlobNameMatched(const std::string &infer_core_name,
                                  const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
                                  const std::vector<std::string>                       &blob_names)
 {
-  auto blob_buffer = infer_core->AllocBlobsBuffer();
-  if (blob_names.size() != blob_buffer->Size())
+  auto blobs_tensor = infer_core->AllocBlobsBuffer();
+  if (blob_names.size() != blobs_tensor->Size())
   {
     ThrowRuntimeError(infer_core_name + " core got different blob size with blob_names input! " +
-                          std::to_string(blob_buffer->Size()) + " vs " +
+                          std::to_string(blobs_tensor->Size()) + " vs " +
                           std::to_string(blob_names.size()),
                       __LINE__);
   }
@@ -28,7 +29,7 @@ static void CheckBlobNameMatched(const std::string &infer_core_name,
   {
     try
     {
-      auto buffer_ptr = blob_buffer->GetOuterBlobBuffer(blob_name);
+      blobs_tensor->GetTensor(blob_name);
     } catch (std::exception e)
     {
       ThrowRuntimeError(infer_core_name + " met invalid blob_name in blob_names : " + blob_name,
@@ -38,31 +39,34 @@ static void CheckBlobNameMatched(const std::string &infer_core_name,
 }
 
 // Bind transpose processing to big core
-static void bind_to_big_core() {
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
+static void bind_to_big_core()
+{
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
 
-    CPU_SET(4, &mask);
-    CPU_SET(5, &mask);
-    CPU_SET(6, &mask);
-    CPU_SET(7, &mask);
+  CPU_SET(4, &mask);
+  CPU_SET(5, &mask);
+  CPU_SET(6, &mask);
+  CPU_SET(7, &mask);
 
-    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-        perror("sched_setaffinity failed");
-    }
+  if (sched_setaffinity(0, sizeof(mask), &mask) == -1)
+  {
+    perror("sched_setaffinity failed");
+  }
 }
 
 // Unbind
-static void unbind_from_big_core() {
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    for (int i = 0; i < sysconf(_SC_NPROCESSORS_ONLN); ++i) {
-        CPU_SET(i, &mask);
-    }
-    sched_setaffinity(0, sizeof(mask), &mask);
-    sched_yield();
+static void unbind_from_big_core()
+{
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
+  for (int i = 0; i < sysconf(_SC_NPROCESSORS_ONLN); ++i)
+  {
+    CPU_SET(i, &mask);
+  }
+  sched_setaffinity(0, sizeof(mask), &mask);
+  sched_yield();
 }
-
 
 static void rknn_nchw_2_nhwc(float *nchw, float *nhwc, int N, int C, int H, int W)
 {
@@ -132,7 +136,6 @@ private:
 
 const std::string MobileSam::model_name_ = "MobileSam";
 
-
 MobileSam::MobileSam(std::shared_ptr<inference_core::BaseInferCore>      image_encoder_core,
                      std::shared_ptr<inference_core::BaseInferCore>      mask_points_decoder_core,
                      std::shared_ptr<inference_core::BaseInferCore>      mask_boxes_decoder_core,
@@ -167,18 +170,17 @@ bool MobileSam::ImagePreProcess(ParsingType package)
               "[MobileSam Image PreProcess] the `package` instance \
                                     is not a instance of `SamPipelinePackage`!");
 
-  auto encoder_blobs_buffer = p_package->image_encoder_blobs_buffer;
+  auto encoder_blobs_tensor = p_package->image_encoder_blobs_buffer;
   // make the output buffer at device side
   // (some inference framework will still output buffer to host side)
-  p_package->image_encoder_blobs_buffer->SetBlobBuffer(encoder_blob_names_[1],
-                                                       DataLocation::DEVICE);
+  encoder_blobs_tensor->GetTensor(encoder_blob_names_[1])->SetBufferLocation(DataLocation::DEVICE);
 
   // preprocess image and write into buffer
   const auto scale = image_preprocess_block_->Preprocess(
-      p_package->input_image_data, encoder_blobs_buffer, encoder_blob_names_[0], IMAGE_INPUT_HEIGHT,
-      IMAGE_INPUT_WIDTH);
+      p_package->input_image_data, encoder_blobs_tensor->GetTensor(encoder_blob_names_[0]),
+      IMAGE_INPUT_HEIGHT, IMAGE_INPUT_WIDTH);
   // set the inference buffer
-  p_package->infer_buffer = p_package->image_encoder_blobs_buffer;
+  p_package->infer_buffer = encoder_blobs_tensor.get();
   // record transform factor
   p_package->transform_scale = scale;
 
@@ -193,11 +195,11 @@ bool MobileSam::PromptBoxPreProcess(ParsingType package)
                           is not a instance of `SamPipelinePackage`!");
 
   // 0. Get the decoder and encoder buffer
-  auto decoder_map_blob2ptr = p_package->mask_decoder_blobs_buffer;
+  auto decoder_blobs_tensor = p_package->mask_decoder_blobs_buffer;
 
-  auto        encoder_map_blob2ptr = p_package->image_encoder_blobs_buffer;
-  const auto &encoder_output     = encoder_map_blob2ptr->GetOuterBlobBuffer(encoder_blob_names_[1]);
-  void       *image_features_ptr = encoder_output.first;
+  auto encoder_blobs_tensor  = p_package->image_encoder_blobs_buffer;
+  auto encoder_output_tensor = encoder_blobs_tensor->GetTensor(encoder_blob_names_[1]);
+  auto image_features_ptr    = encoder_output_tensor->Cast<float>();
 
   ////////////////// Transpose if decoder is rknn framework //////////////////
   if (mask_boxes_decoder_core_->GetType() == inference_core::InferCoreType::RKNN)
@@ -207,26 +209,22 @@ bool MobileSam::PromptBoxPreProcess(ParsingType package)
     const size_t total_image_feature_elements_num =
         IMAGE_FEATURE_HEIGHT * IMAGE_FEATURE_WIDTH * IMAGE_FEATURES_LEN;
     std::vector<float> hwc_buffer(total_image_feature_elements_num);
-    rknn_nchw_2_nhwc(reinterpret_cast<float *>(encoder_output.first), hwc_buffer.data(), 1,
-                     IMAGE_FEATURES_LEN, IMAGE_FEATURE_HEIGHT, IMAGE_FEATURE_WIDTH);
-    memcpy(encoder_output.first, hwc_buffer.data(),
-           total_image_feature_elements_num * sizeof(float));
+    rknn_nchw_2_nhwc(image_features_ptr, hwc_buffer.data(), 1, IMAGE_FEATURES_LEN,
+                     IMAGE_FEATURE_HEIGHT, IMAGE_FEATURE_WIDTH);
+    memcpy(image_features_ptr, hwc_buffer.data(), total_image_feature_elements_num * sizeof(float));
   }
   ////////////////////////////////////////////////////////////////////////////
 
   // Zero-Copy Feature : let decoder use the buffer which encoder outputs
   // Encoder/Decoder with different infer_core are supported. (if the hardware support)
-  decoder_map_blob2ptr->SetBlobBuffer(
-      box_dec_blob_names_[0], encoder_output.first,
-      encoder_output.second);
+  decoder_blobs_tensor->GetTensor(box_dec_blob_names_[0])->ZeroCopy(encoder_output_tensor);
 
   // 1. Set prompt
-  const auto &boxes = p_package->boxes;
-  const auto &scale = p_package->transform_scale;
-  float      *boxes_ptr =
-      static_cast<float *>(decoder_map_blob2ptr->GetOuterBlobBuffer(box_dec_blob_names_[1]).first);
-  const int64_t dynmaic_box_number = boxes.size();
-  for (int i = 0; i < dynmaic_box_number; ++i)
+  const auto    &boxes     = p_package->boxes;
+  const auto    &scale     = p_package->transform_scale;
+  float         *boxes_ptr = decoder_blobs_tensor->GetTensor(box_dec_blob_names_[1])->Cast<float>();
+  const uint64_t dynmaic_box_number = boxes.size();
+  for (uint64_t i = 0; i < dynmaic_box_number; ++i)
   {
     const auto &box      = boxes[i];
     boxes_ptr[i * 4 + 0] = (box.x - box.w / 2.f) * scale;
@@ -236,19 +234,17 @@ bool MobileSam::PromptBoxPreProcess(ParsingType package)
   }
 
   // Set dynamic shape
-  std::vector<int64_t> dynamic_shape{1, dynmaic_box_number, 4};
-  decoder_map_blob2ptr->SetBlobShape(box_dec_blob_names_[1], dynamic_shape);
+  std::vector<uint64_t> dynamic_shape{1, dynmaic_box_number, 4};
+  decoder_blobs_tensor->GetTensor(box_dec_blob_names_[1])->SetShape(dynamic_shape);
 
-  float *mask_input =
-      static_cast<float *>(decoder_map_blob2ptr->GetOuterBlobBuffer(box_dec_blob_names_[2]).first);
+  float *mask_input = decoder_blobs_tensor->GetTensor(box_dec_blob_names_[2])->Cast<float>();
   memset(mask_input, 0, MASK_LOW_RES_WIDTH * MASK_LOW_RES_HEIGHT * sizeof(float));
 
-  float *has_mask_input =
-      static_cast<float *>(decoder_map_blob2ptr->GetOuterBlobBuffer(box_dec_blob_names_[3]).first);
-  has_mask_input[0] = 1.f;
+  float *has_mask_input = decoder_blobs_tensor->GetTensor(box_dec_blob_names_[3])->Cast<float>();
+  has_mask_input[0]     = 1.f;
 
   // 2. Set inference buffer
-  p_package->infer_buffer = decoder_map_blob2ptr;
+  p_package->infer_buffer = decoder_blobs_tensor.get();
 
   return true;
 }
@@ -261,44 +257,39 @@ bool MobileSam::PromptPointPreProcess(ParsingType package)
                           is not a instance of `SamPipelinePackage`!");
 
   // 0. Get the decoder and encoder buffer
-  auto decoder_map_blob2ptr = p_package->mask_decoder_blobs_buffer;
+  auto decoder_blobs_tensor = p_package->mask_decoder_blobs_buffer;
 
-  // 1. 设置image embeddings缓存指针
-  auto        encoder_map_blob2ptr = p_package->image_encoder_blobs_buffer;
-  const auto &encoder_output     = encoder_map_blob2ptr->GetOuterBlobBuffer(encoder_blob_names_[1]);
-  void       *image_features_ptr = encoder_output.first;
+  auto encoder_blobs_tensor  = p_package->image_encoder_blobs_buffer;
+  auto encoder_output_tensor = encoder_blobs_tensor->GetTensor(encoder_blob_names_[1]);
+  auto image_features_ptr    = encoder_output_tensor->Cast<float>();
+
   ////////////////// Transpose if decoder is rknn framework //////////////////
-  if (mask_points_decoder_core_->GetType() == inference_core::InferCoreType::RKNN)
+  if (mask_boxes_decoder_core_->GetType() == inference_core::InferCoreType::RKNN)
   {
-    LOG(WARNING) << "[MobileSAM] Got rknn mask point decoder! Transposing Image Features to `NHWC` "
-                    "format!!!";
+    LOG(WARNING)
+        << "[MobileSAM] Got rknn mask box decoder! Transposing Image Features to `NHWC` format!!!";
     const size_t total_image_feature_elements_num =
         IMAGE_FEATURE_HEIGHT * IMAGE_FEATURE_WIDTH * IMAGE_FEATURES_LEN;
     std::vector<float> hwc_buffer(total_image_feature_elements_num);
-    rknn_nchw_2_nhwc(reinterpret_cast<float *>(encoder_output.first), hwc_buffer.data(), 1,
-                     IMAGE_FEATURES_LEN, IMAGE_FEATURE_HEIGHT, IMAGE_FEATURE_WIDTH);
-    memcpy(encoder_output.first, hwc_buffer.data(),
-           total_image_feature_elements_num * sizeof(float));
+    rknn_nchw_2_nhwc(image_features_ptr, hwc_buffer.data(), 1, IMAGE_FEATURES_LEN,
+                     IMAGE_FEATURE_HEIGHT, IMAGE_FEATURE_WIDTH);
+    memcpy(image_features_ptr, hwc_buffer.data(), total_image_feature_elements_num * sizeof(float));
   }
   ////////////////////////////////////////////////////////////////////////////
 
   // Zero-Copy Feature : let decoder use the buffer which encoder outputs
   // Encoder/Decoder with different infer_core are supported. (if the hardware support)
-  decoder_map_blob2ptr->SetBlobBuffer(
-      point_dec_blob_names_[0], encoder_output.first,
-      encoder_output.second);
+  decoder_blobs_tensor->GetTensor(box_dec_blob_names_[0])->ZeroCopy(encoder_output_tensor);
 
   // 1. Set prompt
   const auto &points     = p_package->points;
   const auto &labels     = p_package->labels;
   const auto &scale      = p_package->transform_scale;
-  float      *points_ptr = reinterpret_cast<float *>(
-      decoder_map_blob2ptr->GetOuterBlobBuffer(point_dec_blob_names_[1]).first);
-  float *labels_ptr = reinterpret_cast<float *>(
-      decoder_map_blob2ptr->GetOuterBlobBuffer(point_dec_blob_names_[2]).first);
+  float      *points_ptr = decoder_blobs_tensor->GetTensor(point_dec_blob_names_[1])->Cast<float>();
+  float      *labels_ptr = decoder_blobs_tensor->GetTensor(point_dec_blob_names_[2])->Cast<float>();
 
-  const int64_t dynamic_point_number = points.size();
-  for (int i = 0; i < dynamic_point_number; ++i)
+  const uint64_t dynamic_point_number = points.size();
+  for (uint64_t i = 0; i < dynamic_point_number; ++i)
   {
     const auto &point     = points[i];
     const auto &lab       = labels[i];
@@ -308,21 +299,19 @@ bool MobileSam::PromptPointPreProcess(ParsingType package)
   }
 
   // Set dynamic shape
-  std::vector<int64_t> coords_dynamic_shape{1, dynamic_point_number, 2};
-  decoder_map_blob2ptr->SetBlobShape(point_dec_blob_names_[1], coords_dynamic_shape);
-  std::vector<int64_t> labels_dynamic_shape{1, dynamic_point_number};
-  decoder_map_blob2ptr->SetBlobShape(point_dec_blob_names_[2], labels_dynamic_shape);
+  std::vector<uint64_t> coords_dynamic_shape{1, dynamic_point_number, 2};
+  decoder_blobs_tensor->GetTensor(point_dec_blob_names_[1])->SetShape(coords_dynamic_shape);
+  std::vector<uint64_t> labels_dynamic_shape{1, dynamic_point_number};
+  decoder_blobs_tensor->GetTensor(point_dec_blob_names_[2])->SetShape(labels_dynamic_shape);
 
-  float *mask_input = static_cast<float *>(
-      decoder_map_blob2ptr->GetOuterBlobBuffer(point_dec_blob_names_[3]).first);
+  float *mask_input = decoder_blobs_tensor->GetTensor(point_dec_blob_names_[3])->Cast<float>();
   memset(mask_input, 0, MASK_LOW_RES_HEIGHT * MASK_LOW_RES_WIDTH * sizeof(float));
 
-  float *has_mask_input = static_cast<float *>(
-      decoder_map_blob2ptr->GetOuterBlobBuffer(point_dec_blob_names_[4]).first);
-  has_mask_input[0] = 1.f;
+  float *has_mask_input = decoder_blobs_tensor->GetTensor(point_dec_blob_names_[4])->Cast<float>();
+  has_mask_input[0]     = 1.f;
 
   // 2. Set inference buffer
-  p_package->infer_buffer = decoder_map_blob2ptr;
+  p_package->infer_buffer = decoder_blobs_tensor.get();
 
   return true;
 }
@@ -334,11 +323,10 @@ bool MobileSam::MaskPostProcess(ParsingType package)
               "[MobileSam Mask PostProcess] the `package` instance \
                           is not a instance of `SamPipelinePackage`!");
 
-  auto decoder_map_blob2ptr = p_package->mask_decoder_blobs_buffer;
+  auto decoder_blobs_tensor = p_package->mask_decoder_blobs_buffer;
 
   // 1. Get the output masks buffer
-  void *decoder_output_masks_ptr =
-      decoder_map_blob2ptr->GetOuterBlobBuffer(MASK_OUT_BLOB_NAME).first;
+  void   *decoder_output_masks_ptr = decoder_blobs_tensor->GetTensor(MASK_OUT_BLOB_NAME)->RawPtr();
   cv::Mat masks_output(MASK_LOW_RES_HEIGHT, MASK_LOW_RES_WIDTH, CV_32FC1, decoder_output_masks_ptr);
 
   // 2. resize to 1024,1024
@@ -379,6 +367,5 @@ std::shared_ptr<BaseSamModel> CreateMobileSamModel(
                                      mask_boxes_decoder_core, image_preprocess_block,
                                      encoder_blob_names, box_dec_blob_names, point_dec_blob_names);
 }
-
 
 } // namespace sam
