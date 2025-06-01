@@ -20,6 +20,9 @@ jobs:
         -w /workspace
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
     - name: Compile Codes
       run:
         cd /workspace &&
@@ -37,6 +40,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     # 启用 QEMU 虚拟化支持
     - name: Set up QEMU
