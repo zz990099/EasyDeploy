@@ -17,9 +17,9 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} SHARED ${source_file})   
+add_library(${PROJECT_NAME} SHARED ${source_file})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC 
+target_link_libraries(${PROJECT_NAME} PUBLIC
   glog::glog
   ${OpenCV_LIBS}
   deploy_core
@@ -29,3 +29,7 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+if (BUILD_TESTING)
+  add_subdirectory(test)
+endif()

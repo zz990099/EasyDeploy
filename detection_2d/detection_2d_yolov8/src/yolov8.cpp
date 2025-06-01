@@ -66,34 +66,24 @@ Yolov8Detection::Yolov8Detection(const std::shared_ptr<inference_core::BaseInfer
       output_blobs_name_(output_blobs_name),
       downsample_scales_(downsample_scales)
 {
-  // Check if the input arguments and inference_core matches 
-  auto p_map_buffer2ptr = infer_core_->AllocBlobsBuffer();
-  if (p_map_buffer2ptr->Size() != input_blobs_name_.size() + output_blobs_name_.size())
+  // Check if the input arguments and inference_core matches
+  auto blobs_tensor = infer_core_->AllocBlobsBuffer();
+  if (blobs_tensor->Size() != input_blobs_name_.size() + output_blobs_name_.size())
   {
     LOG(ERROR) << "[Yolov8Detection] Infer core should has {"
                << input_blobs_name_.size() + output_blobs_name_.size() << "} blobs !"
-               << " but got " << p_map_buffer2ptr->Size() << " blobs";
+               << " but got " << blobs_tensor->Size() << " blobs";
     throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
   }
 
   for (const std::string &input_blob_name : input_blobs_name)
   {
-    if (p_map_buffer2ptr->GetOuterBlobBuffer(input_blob_name).first == nullptr)
-    {
-      LOG(ERROR) << "[Yolov8Detection] Input_blob_name_ {" << input_blob_name
-                 << "input blob name does not match `infer_core_` !";
-      throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
-    }
+    blobs_tensor->GetTensor(input_blob_name);
   }
 
   for (const std::string &output_blob_name : output_blobs_name)
   {
-    if (p_map_buffer2ptr->GetOuterBlobBuffer(output_blob_name).first == nullptr)
-    {
-      LOG(ERROR) << "[Yolov8Detection] Output_blob_name_ {" << output_blob_name
-                 << "} does not match name in infer_core_ !";
-      throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
-    }
+    blobs_tensor->GetTensor(output_blob_name);
   }
 
   for (const int s : downsample_scales_)
@@ -118,9 +108,12 @@ bool Yolov8Detection::PreProcess(std::shared_ptr<async_pipeline::IPipelinePackag
               "[Yolov8Detection] PreProcess the `_package` instance does not belong to "
               "`DetectionPipelinePackage`");
 
-  const auto &p_blob_buffers = package->GetInferBuffer();
-  float       scale = preprocess_block_->Preprocess(package->input_image_data, p_blob_buffers,
-                                                    input_blobs_name_[0], input_height_, input_width_);
+  const auto &blobs_tensor = package->GetInferBuffer();
+
+  float scale = preprocess_block_->Preprocess(package->input_image_data,
+                                              blobs_tensor->GetTensor(input_blobs_name_[0]),
+                                              input_height_, input_width_);
+
   package->transform_scale = scale;
   return true;
 }
@@ -136,7 +129,7 @@ bool Yolov8Detection::PostProcess(std::shared_ptr<async_pipeline::IPipelinePacka
   std::vector<void *> output_blobs_ptr;
   for (const std::string &output_blob_name : output_blobs_name_)
   {
-    void *blob_ptr = p_blob_buffers->GetOuterBlobBuffer(output_blob_name).first;
+    void *blob_ptr = p_blob_buffers->GetTensor(output_blob_name)->RawPtr();
     output_blobs_ptr.push_back(blob_ptr);
   }
 

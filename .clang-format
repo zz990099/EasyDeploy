@@ -10,7 +10,7 @@ IndentWidth: 2
 # 连续的空行保留几行
 MaxEmptyLinesToKeep: 1
 # 圆括号的换行方式
-BreakBeforeBraces: Custom 
+BreakBeforeBraces: Custom
 # 是否允许短方法单行
 AllowShortFunctionsOnASingleLine: false
 # 支持一行的if
