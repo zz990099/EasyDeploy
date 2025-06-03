@@ -89,7 +89,7 @@ public:
                                    input_channels, cls_number, input_blobs_name, output_blobs_name);
 
     test_image_path_              = "/workspace/test_data/persons.jpg";
-    test_visual_result_save_path_ = "/workspace/test_data/rt_detr_tensorrt_test_result.jpg";
+    test_visual_result_save_path_ = "/workspace/test_data/rt_detr_onnxruntime_test_result.jpg";
     conf_threshold_               = 0.4;
     expected_obj_num_             = 23ul;
   }
