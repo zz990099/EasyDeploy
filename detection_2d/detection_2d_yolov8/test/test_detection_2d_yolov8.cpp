@@ -116,8 +116,8 @@ public:
     const int                      cls_number     = 80;
     const std::vector<std::string> input_blobs_name  = {"images"};
     const std::vector<std::string> output_blobs_name = {"318", "onnx::ReduceSum_326", "331",
-                                                      "338", "onnx::ReduceSum_346", "350",
-                                                      "357", "onnx::ReduceSum_365", "369"};
+                                                        "338", "onnx::ReduceSum_346", "350",
+                                                        "357", "onnx::ReduceSum_365", "369"};
 
     auto infer_core  = CreateRknnInferCore(model_path, {{"images", RknnInputTensorType::RK_UINT8}});
     auto preprocess  = CreateCpuDetPreProcess({0, 0, 0}, {1, 1, 1}, false, false);
