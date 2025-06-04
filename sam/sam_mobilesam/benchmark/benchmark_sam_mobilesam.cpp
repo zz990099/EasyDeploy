@@ -162,7 +162,7 @@ std::shared_ptr<BaseSamModel> CreateSAMRknnModel(const std::string &image_encode
   auto point_decoder_model_path = "/workspace/models/modified_mobile_sam_point.rknn";
 
   auto nanosam_image_encoder = CreateRknnInferCore(
-      nanosam_image_encoder_model_path, {{"images", RknnInputTensorType::RK_UINT8}}, 5, 2);
+      image_encoder_model_path, {{"images", RknnInputTensorType::RK_UINT8}}, 5, 2);
 
   auto box_decoder_factory = CreateRknnInferCoreFactory(box_decoder_model_path, {}, 5, 2);
 
@@ -186,7 +186,7 @@ static void benchmark_sam_nanosam_rknn_async(benchmark::State &state)
   auto nanosam_image_encoder_model_path = "/workspace/models/nanosam_image_encoder_opset11.rknn";
   benchmark_sam_async(state, CreateSAMRknnModel(nanosam_image_encoder_model_path));
 }
-BENCHMARK(benchmark_sam_nanosam_rknn_sync)->Arg(100)->UseRealTime();
+BENCHMARK(benchmark_sam_nanosam_rknn_sync)->Arg(50)->UseRealTime();
 BENCHMARK(benchmark_sam_nanosam_rknn_async)->Arg(100)->UseRealTime();
 
 #endif
