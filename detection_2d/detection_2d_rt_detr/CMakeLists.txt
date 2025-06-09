@@ -35,3 +35,7 @@ endif()
 if (BUILD_BENCHMARK)
   add_subdirectory(benchmark)
 endif()
+
+if (BUILD_EVAL)
+  add_subdirectory(eval)
+endif()
