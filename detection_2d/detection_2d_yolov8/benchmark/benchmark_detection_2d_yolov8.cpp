@@ -1,16 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "detection_2d_util/detection_2d_util.h"
-#include "detection_2d_yolov8/yolov8.h"
+#include "detection_2d_util/detection_2d_util.hpp"
+#include "detection_2d_yolov8/yolov8.hpp"
 #include "benchmark_utils/detection_2d_benchmark_utils.hpp"
 
-using namespace inference_core;
-using namespace detection_2d;
-using namespace benchmark_utils;
+using namespace easy_deploy;
 
 #ifdef ENABLE_TENSORRT
 
-#include "trt_core/trt_core.h"
+#include "trt_core/trt_core.hpp"
 
 std::shared_ptr<BaseDetectionModel> CreateYolov8TensorRTModel()
 {
@@ -47,7 +45,7 @@ BENCHMARK(benchmark_detection_2d_yolov8_tensorrt_async)->Arg(1000)->UseRealTime(
 
 #ifdef ENABLE_ORT
 
-#include "ort_core/ort_core.h"
+#include "ort_core/ort_core.hpp"
 
 std::shared_ptr<BaseDetectionModel> CreateYolov8OnnxRuntimeModel()
 {
@@ -84,7 +82,7 @@ BENCHMARK(benchmark_detection_2d_yolov8_onnxruntime_async)->Arg(200)->UseRealTim
 
 #ifdef ENABLE_RKNN
 
-#include "rknn_core/rknn_core.h"
+#include "rknn_core/rknn_core.hpp"
 
 std::shared_ptr<BaseDetectionModel> CreateYolov8RknnModel()
 {

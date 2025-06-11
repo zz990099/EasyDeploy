@@ -1,33 +1,26 @@
-/*
- * @Description:
- * @Author: Teddywesside 18852056629@163.com
- * @Date: 2024-11-26 19:41:34
- * @LastEditTime: 2024-12-03 15:57:46
- * @FilePath: /EasyDeploy/detection_2d/detection_2d_yolov8/src/yolov8.cpp
- */
-#include "detection_2d_yolov8/yolov8.h"
+#include "detection_2d_yolov8/yolov8.hpp"
 
-namespace detection_2d {
+namespace easy_deploy {
 
 class Yolov8Detection : public BaseDetectionModel {
 public:
-  Yolov8Detection(const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
-                  const std::shared_ptr<IDetectionPreProcess>          &preprocess_block,
-                  const std::shared_ptr<IDetectionPostProcess>         &postprocess_block,
-                  const int                                             input_height,
-                  const int                                             input_width,
-                  const int                                             input_channel,
-                  const int                                             cls_number,
-                  const std::vector<std::string>                       &input_blobs_name,
-                  const std::vector<std::string>                       &output_blobs_name,
-                  const std::vector<int> downsample_scales = {8, 16, 32});
+  Yolov8Detection(const std::shared_ptr<BaseInferCore>         &infer_core,
+                  const std::shared_ptr<IDetectionPreProcess>  &preprocess_block,
+                  const std::shared_ptr<IDetectionPostProcess> &postprocess_block,
+                  const int                                     input_height,
+                  const int                                     input_width,
+                  const int                                     input_channel,
+                  const int                                     cls_number,
+                  const std::vector<std::string>               &input_blobs_name,
+                  const std::vector<std::string>               &output_blobs_name,
+                  const std::vector<int>                        downsample_scales = {8, 16, 32});
 
   ~Yolov8Detection() = default;
 
 private:
-  bool PreProcess(std::shared_ptr<async_pipeline::IPipelinePackage> pipeline_unit) override;
+  bool PreProcess(std::shared_ptr<IPipelinePackage> pipeline_unit) override;
 
-  bool PostProcess(std::shared_ptr<async_pipeline::IPipelinePackage> pipeline_unit) override;
+  bool PostProcess(std::shared_ptr<IPipelinePackage> pipeline_unit) override;
 
 private:
   const std::vector<std::string> input_blobs_name_;
@@ -39,12 +32,12 @@ private:
 
   const std::vector<int> downsample_scales_;
 
-  const std::shared_ptr<inference_core::BaseInferCore> infer_core_;
-  std::shared_ptr<IDetectionPreProcess>                preprocess_block_;
-  std::shared_ptr<IDetectionPostProcess>               postprocess_block_;
+  const std::shared_ptr<BaseInferCore>   infer_core_;
+  std::shared_ptr<IDetectionPreProcess>  preprocess_block_;
+  std::shared_ptr<IDetectionPostProcess> postprocess_block_;
 };
 
-Yolov8Detection::Yolov8Detection(const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
+Yolov8Detection::Yolov8Detection(const std::shared_ptr<BaseInferCore>         &infer_core,
                                  const std::shared_ptr<IDetectionPreProcess>  &preprocess_block,
                                  const std::shared_ptr<IDetectionPostProcess> &postprocess_block,
                                  const int                                     input_height,
@@ -70,9 +63,8 @@ Yolov8Detection::Yolov8Detection(const std::shared_ptr<inference_core::BaseInfer
   auto blobs_tensor = infer_core_->AllocBlobsBuffer();
   if (blobs_tensor->Size() != input_blobs_name_.size() + output_blobs_name_.size())
   {
-    LOG(ERROR) << "[Yolov8Detection] Infer core should has {"
-               << input_blobs_name_.size() + output_blobs_name_.size() << "} blobs !"
-               << " but got " << blobs_tensor->Size() << " blobs";
+    LOG_ERROR("[Yolov8Detection] Infer core should has {%ld} blobs, but got {%ld} blobs",
+              input_blobs_name_.size() + output_blobs_name_.size(), blobs_tensor->Size());
     throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
   }
 
@@ -90,18 +82,18 @@ Yolov8Detection::Yolov8Detection(const std::shared_ptr<inference_core::BaseInfer
   {
     if (input_height_ % s != 0)
     {
-      LOG(ERROR) << "[Yolov8Detection] `input_height_` should be an integer multiple of `s`";
+      LOG_ERROR("[Yolov8Detection] `input_height_` should be an integer multiple of `s`");
       throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
     }
     if (input_width_ % s != 0)
     {
-      LOG(ERROR) << "[Yolov8Detection] `input_width_` should be an integer multiple of `s`";
+      LOG_ERROR("[Yolov8Detection] `input_width_` should be an integer multiple of `s`");
       throw std::runtime_error("[Yolov8Detection] Got invalid input arguments!!");
     }
   }
 }
 
-bool Yolov8Detection::PreProcess(std::shared_ptr<async_pipeline::IPipelinePackage> _package)
+bool Yolov8Detection::PreProcess(std::shared_ptr<IPipelinePackage> _package)
 {
   auto package = std::dynamic_pointer_cast<DetectionPipelinePackage>(_package);
   CHECK_STATE(package != nullptr,
@@ -118,7 +110,7 @@ bool Yolov8Detection::PreProcess(std::shared_ptr<async_pipeline::IPipelinePackag
   return true;
 }
 
-bool Yolov8Detection::PostProcess(std::shared_ptr<async_pipeline::IPipelinePackage> _package)
+bool Yolov8Detection::PostProcess(std::shared_ptr<IPipelinePackage> _package)
 {
   auto package = std::dynamic_pointer_cast<DetectionPipelinePackage>(_package);
   CHECK_STATE(package != nullptr,
@@ -140,20 +132,20 @@ bool Yolov8Detection::PostProcess(std::shared_ptr<async_pipeline::IPipelinePacka
 }
 
 std::shared_ptr<BaseDetectionModel> CreateYolov8DetectionModel(
-    const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
-    const std::shared_ptr<IDetectionPreProcess>          &preprocess_block,
-    const std::shared_ptr<IDetectionPostProcess>         &postprocess_block,
-    const int                                             input_height,
-    const int                                             input_width,
-    const int                                             input_channel,
-    const int                                             cls_number,
-    const std::vector<std::string>                       &input_blobs_name,
-    const std::vector<std::string>                       &output_blobs_name,
-    const std::vector<int>                                downsample_scales)
+    const std::shared_ptr<BaseInferCore>         &infer_core,
+    const std::shared_ptr<IDetectionPreProcess>  &preprocess_block,
+    const std::shared_ptr<IDetectionPostProcess> &postprocess_block,
+    const int                                     input_height,
+    const int                                     input_width,
+    const int                                     input_channel,
+    const int                                     cls_number,
+    const std::vector<std::string>               &input_blobs_name,
+    const std::vector<std::string>               &output_blobs_name,
+    const std::vector<int>                        downsample_scales)
 {
   return std::make_shared<Yolov8Detection>(infer_core, preprocess_block, postprocess_block,
                                            input_height, input_width, input_channel, cls_number,
                                            input_blobs_name, output_blobs_name, downsample_scales);
 }
 
-} // namespace detection_2d
+} // namespace easy_deploy

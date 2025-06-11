@@ -1,11 +1,11 @@
-#include "sam_mobilesam/mobilesam.h"
+#include "sam_mobilesam/mobilesam.hpp"
 
-#include "deploy_core/wrapper.h"
+#include "deploy_core/wrapper.hpp"
 
 #include <sched.h>
 #include <unistd.h>
 
-namespace sam {
+namespace easy_deploy {
 
 static void ThrowRuntimeError(const std::string &hint, uint64_t line_num)
 {
@@ -13,9 +13,9 @@ static void ThrowRuntimeError(const std::string &hint, uint64_t line_num)
   throw std::runtime_error(exception_message);
 }
 
-static void CheckBlobNameMatched(const std::string &infer_core_name,
-                                 const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
-                                 const std::vector<std::string>                       &blob_names)
+static void CheckBlobNameMatched(const std::string                    &infer_core_name,
+                                 const std::shared_ptr<BaseInferCore> &infer_core,
+                                 const std::vector<std::string>       &blob_names)
 {
   auto blobs_tensor = infer_core->AllocBlobsBuffer();
   if (blob_names.size() != blobs_tensor->Size())
@@ -93,13 +93,13 @@ static void rknn_nchw_2_nhwc(float *nchw, float *nhwc, int N, int C, int H, int 
 
 class MobileSam : public BaseSamModel {
 public:
-  MobileSam(std::shared_ptr<inference_core::BaseInferCore>      image_encoder_core,
-            std::shared_ptr<inference_core::BaseInferCore>      mask_points_decoder_core,
-            std::shared_ptr<inference_core::BaseInferCore>      mask_boxes_decoder_core,
-            std::shared_ptr<detection_2d::IDetectionPreProcess> image_preprocess_block,
-            const std::vector<std::string>                     &encoder_blob_names,
-            const std::vector<std::string>                     &box_dec_blob_names,
-            const std::vector<std::string>                     &point_dec_blob_names);
+  MobileSam(std::shared_ptr<BaseInferCore>        image_encoder_core,
+            std::shared_ptr<BaseInferCore>        mask_points_decoder_core,
+            std::shared_ptr<BaseInferCore>        mask_boxes_decoder_core,
+            std::shared_ptr<IDetectionPreProcess> image_preprocess_block,
+            const std::vector<std::string>       &encoder_blob_names,
+            const std::vector<std::string>       &box_dec_blob_names,
+            const std::vector<std::string>       &point_dec_blob_names);
 
   ~MobileSam() = default;
 
@@ -120,7 +120,7 @@ private:
   const std::vector<std::string> box_dec_blob_names_;
   const std::vector<std::string> point_dec_blob_names_;
 
-  std::shared_ptr<detection_2d::IDetectionPreProcess> image_preprocess_block_;
+  std::shared_ptr<IDetectionPreProcess> image_preprocess_block_;
 
 private:
   // defualt params, no access provided to user
@@ -136,13 +136,13 @@ private:
 
 const std::string MobileSam::model_name_ = "MobileSam";
 
-MobileSam::MobileSam(std::shared_ptr<inference_core::BaseInferCore>      image_encoder_core,
-                     std::shared_ptr<inference_core::BaseInferCore>      mask_points_decoder_core,
-                     std::shared_ptr<inference_core::BaseInferCore>      mask_boxes_decoder_core,
-                     std::shared_ptr<detection_2d::IDetectionPreProcess> image_preprocess_block,
-                     const std::vector<std::string>                     &encoder_blob_names,
-                     const std::vector<std::string>                     &box_dec_blob_names,
-                     const std::vector<std::string>                     &point_dec_blob_names)
+MobileSam::MobileSam(std::shared_ptr<BaseInferCore>        image_encoder_core,
+                     std::shared_ptr<BaseInferCore>        mask_points_decoder_core,
+                     std::shared_ptr<BaseInferCore>        mask_boxes_decoder_core,
+                     std::shared_ptr<IDetectionPreProcess> image_preprocess_block,
+                     const std::vector<std::string>       &encoder_blob_names,
+                     const std::vector<std::string>       &box_dec_blob_names,
+                     const std::vector<std::string>       &point_dec_blob_names)
     : BaseSamModel(
           model_name_, image_encoder_core, mask_points_decoder_core, mask_boxes_decoder_core),
       image_preprocess_block_(image_preprocess_block),
@@ -202,10 +202,10 @@ bool MobileSam::PromptBoxPreProcess(ParsingType package)
   auto image_features_ptr    = encoder_output_tensor->Cast<float>();
 
   ////////////////// Transpose if decoder is rknn framework //////////////////
-  if (mask_boxes_decoder_core_->GetType() == inference_core::InferCoreType::RKNN)
+  if (mask_boxes_decoder_core_->GetType() == InferCoreType::RKNN)
   {
-    LOG(WARNING)
-        << "[MobileSAM] Got rknn mask box decoder! Transposing Image Features to `NHWC` format!!!";
+    LOG_DEBUG(
+        "[MobileSAM] Got rknn mask box decoder! Transposing Image Features to `NHWC` format!!!");
     const size_t total_image_feature_elements_num =
         IMAGE_FEATURE_HEIGHT * IMAGE_FEATURE_WIDTH * IMAGE_FEATURES_LEN;
     std::vector<float> hwc_buffer(total_image_feature_elements_num);
@@ -264,10 +264,10 @@ bool MobileSam::PromptPointPreProcess(ParsingType package)
   auto image_features_ptr    = encoder_output_tensor->Cast<float>();
 
   ////////////////// Transpose if decoder is rknn framework //////////////////
-  if (mask_boxes_decoder_core_->GetType() == inference_core::InferCoreType::RKNN)
+  if (mask_boxes_decoder_core_->GetType() == InferCoreType::RKNN)
   {
-    LOG(WARNING)
-        << "[MobileSAM] Got rknn mask box decoder! Transposing Image Features to `NHWC` format!!!";
+    LOG_DEBUG(
+        "[MobileSAM] Got rknn mask box decoder! Transposing Image Features to `NHWC` format!!!");
     const size_t total_image_feature_elements_num =
         IMAGE_FEATURE_HEIGHT * IMAGE_FEATURE_WIDTH * IMAGE_FEATURES_LEN;
     std::vector<float> hwc_buffer(total_image_feature_elements_num);
@@ -355,17 +355,17 @@ bool MobileSam::MaskPostProcess(ParsingType package)
 }
 
 std::shared_ptr<BaseSamModel> CreateMobileSamModel(
-    std::shared_ptr<inference_core::BaseInferCore>      image_encoder_core,
-    std::shared_ptr<inference_core::BaseInferCore>      mask_points_decoder_core,
-    std::shared_ptr<inference_core::BaseInferCore>      mask_boxes_decoder_core,
-    std::shared_ptr<detection_2d::IDetectionPreProcess> image_preprocess_block,
-    const std::vector<std::string>                     &encoder_blob_names,
-    const std::vector<std::string>                     &box_dec_blob_names,
-    const std::vector<std::string>                     &point_dec_blob_names)
+    std::shared_ptr<BaseInferCore>        image_encoder_core,
+    std::shared_ptr<BaseInferCore>        mask_points_decoder_core,
+    std::shared_ptr<BaseInferCore>        mask_boxes_decoder_core,
+    std::shared_ptr<IDetectionPreProcess> image_preprocess_block,
+    const std::vector<std::string>       &encoder_blob_names,
+    const std::vector<std::string>       &box_dec_blob_names,
+    const std::vector<std::string>       &point_dec_blob_names)
 {
   return std::make_shared<MobileSam>(image_encoder_core, mask_points_decoder_core,
                                      mask_boxes_decoder_core, image_preprocess_block,
                                      encoder_blob_names, box_dec_blob_names, point_dec_blob_names);
 }
 
-} // namespace sam
+} // namespace easy_deploy

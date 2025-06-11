@@ -1,12 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "detection_2d_util/detection_2d_util.h"
-#include "detection_2d_yolov8/yolov8.h"
+#include "detection_2d_util/detection_2d_util.hpp"
+#include "detection_2d_yolov8/yolov8.hpp"
 #include "test_utils/detection_2d_test_utils.hpp"
 
-using namespace inference_core;
-using namespace detection_2d;
-using namespace test_utils;
+using namespace easy_deploy;
 
 #define GEN_TEST_CASES(Tag, FixtureClass)                                                      \
   TEST_F(FixtureClass, test_yolov8_##Tag##_correctness)                                        \
@@ -33,7 +31,7 @@ protected:
 
 #ifdef ENABLE_TENSORRT
 
-#include "trt_core/trt_core.h"
+#include "trt_core/trt_core.hpp"
 
 class Yolov8_TensorRT_Fixture : public BaseYolov8Fixture {
 public:
@@ -68,7 +66,7 @@ GEN_TEST_CASES(tensorrt, Yolov8_TensorRT_Fixture);
 
 #ifdef ENABLE_ORT
 
-#include "ort_core/ort_core.h"
+#include "ort_core/ort_core.hpp"
 
 class Yolov8_OnnxRuntime_Fixture : public BaseYolov8Fixture {
 public:
@@ -103,7 +101,7 @@ GEN_TEST_CASES(onnxruntime, Yolov8_OnnxRuntime_Fixture);
 
 #ifdef ENABLE_RKNN
 
-#include "rknn_core/rknn_core.h"
+#include "rknn_core/rknn_core.hpp"
 
 class Yolov8_Rknn_Fixture : public BaseYolov8Fixture {
 public:

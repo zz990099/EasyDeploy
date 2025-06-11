@@ -1,32 +1,25 @@
-/*
- * @Description:
- * @Author: Teddywesside 18852056629@163.com
- * @Date: 2024-12-02 19:08:10
- * @LastEditTime: 2024-12-02 19:31:43
- * @FilePath: /easy_deploy/detection_2d/detection_2d_yolov8/src/yolov8_factory.cpp
- */
-#include "detection_2d_yolov8/yolov8.h"
+#include "detection_2d_yolov8/yolov8.hpp"
 
-namespace detection_2d {
+namespace easy_deploy {
 
 struct Yolov8Params {
-  std::shared_ptr<inference_core::BaseInferCoreFactory>          infer_core_factory;
-  std::shared_ptr<detection_2d::BaseDetectionPreprocessFactory>  preprocess_factory;
-  std::shared_ptr<detection_2d::BaseDetectionPostprocessFactory> postprocess_factory;
-  int                                                            input_height;
-  int                                                            input_width;
-  int                                                            input_channel;
-  int                                                            cls_number;
-  std::vector<std::string>                                       input_blob_name;
-  std::vector<std::string>                                       output_blob_name;
-  std::vector<int>                                               downsample_scales;
+  std::shared_ptr<BaseInferCoreFactory>            infer_core_factory;
+  std::shared_ptr<BaseDetectionPreprocessFactory>  preprocess_factory;
+  std::shared_ptr<BaseDetectionPostprocessFactory> postprocess_factory;
+  int                                              input_height;
+  int                                              input_width;
+  int                                              input_channel;
+  int                                              cls_number;
+  std::vector<std::string>                         input_blob_name;
+  std::vector<std::string>                         output_blob_name;
+  std::vector<int>                                 downsample_scales;
 };
 
 class Detection2DYolov8Factory : public BaseDetection2DFactory {
 public:
   Detection2DYolov8Factory(const Yolov8Params &params) : params_(params)
   {}
-  std::shared_ptr<detection_2d::BaseDetectionModel> Create() override
+  std::shared_ptr<BaseDetectionModel> Create() override
   {
     return CreateYolov8DetectionModel(
         params_.infer_core_factory->Create(), params_.preprocess_factory->Create(),
@@ -40,16 +33,16 @@ private:
 };
 
 std::shared_ptr<BaseDetection2DFactory> CreateYolov8DetectionModelFactory(
-    std::shared_ptr<inference_core::BaseInferCoreFactory>          infer_core_factory,
-    std::shared_ptr<detection_2d::BaseDetectionPreprocessFactory>  preprocess_factory,
-    std::shared_ptr<detection_2d::BaseDetectionPostprocessFactory> postprocess_factory,
-    int                                                            input_height,
-    int                                                            input_width,
-    int                                                            input_channel,
-    int                                                            cls_number,
-    const std::vector<std::string>                                &input_blob_name,
-    const std::vector<std::string>                                &output_blob_name,
-    const std::vector<int>                                        &downsample_scales)
+    std::shared_ptr<BaseInferCoreFactory>            infer_core_factory,
+    std::shared_ptr<BaseDetectionPreprocessFactory>  preprocess_factory,
+    std::shared_ptr<BaseDetectionPostprocessFactory> postprocess_factory,
+    int                                              input_height,
+    int                                              input_width,
+    int                                              input_channel,
+    int                                              cls_number,
+    const std::vector<std::string>                  &input_blob_name,
+    const std::vector<std::string>                  &output_blob_name,
+    const std::vector<int>                          &downsample_scales)
 {
   if (infer_core_factory == nullptr || preprocess_factory == nullptr ||
       postprocess_factory == nullptr)
@@ -72,4 +65,4 @@ std::shared_ptr<BaseDetection2DFactory> CreateYolov8DetectionModelFactory(
   return std::make_shared<Detection2DYolov8Factory>(params);
 }
 
-} // namespace detection_2d
+} // namespace easy_deploy
