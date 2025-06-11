@@ -1,17 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "detection_2d_util/detection_2d_util.h"
-#include "sam_mobilesam/mobilesam.h"
+#include "detection_2d_util/detection_2d_util.hpp"
+#include "sam_mobilesam/mobilesam.hpp"
 #include "benchmark_utils/sam_benchmark_utils.hpp"
 
-using namespace inference_core;
-using namespace detection_2d;
-using namespace sam;
-using namespace benchmark_utils;
+using namespace easy_deploy;
 
 #ifdef ENABLE_TENSORRT
 
-#include "trt_core/trt_core.h"
+#include "trt_core/trt_core.hpp"
 
 std::shared_ptr<BaseSamModel> CreateSAMTensorRTModel(const std::string &image_encoder_model_path)
 {
@@ -82,7 +79,7 @@ BENCHMARK(benchmark_sam_nanosam_tensorrt_async)->Arg(200)->UseRealTime();
 
 #ifdef ENABLE_ORT
 
-#include "ort_core/ort_core.h"
+#include "ort_core/ort_core.hpp"
 
 std::shared_ptr<BaseSamModel> CreateSAMOnnxRuntimeModel(const std::string &image_encoder_model_path)
 {
@@ -154,7 +151,7 @@ BENCHMARK(benchmark_sam_nanosam_onnxruntime_async)->Arg(50)->UseRealTime();
 
 #ifdef ENABLE_RKNN
 
-#include "rknn_core/rknn_core.h"
+#include "rknn_core/rknn_core.hpp"
 
 std::shared_ptr<BaseSamModel> CreateSAMRknnModel(const std::string &image_encoder_model_path)
 {

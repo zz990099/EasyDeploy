@@ -6,7 +6,6 @@ add_compile_options(-O3 -Wextra -Wdeprecated -fPIC)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(OpenCV REQUIRED)
-find_package(glog REQUIRED)
 
 include_directories(
   include
@@ -19,9 +18,9 @@ set(source_file src/yolov8.cpp
 add_library(${PROJECT_NAME} SHARED ${source_file})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  glog::glog
   ${OpenCV_LIBS}
   deploy_core
+  common_utils
 )
 
 install(TARGETS ${PROJECT_NAME}

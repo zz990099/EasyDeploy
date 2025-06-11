@@ -1,12 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "detection_2d_util/detection_2d_util.h"
-#include "detection_2d_rt_detr/rt_detr.h"
+#include "detection_2d_util/detection_2d_util.hpp"
+#include "detection_2d_rt_detr/rt_detr.hpp"
 #include "test_utils/detection_2d_test_utils.hpp"
 
-using namespace inference_core;
-using namespace detection_2d;
-using namespace test_utils;
+using namespace easy_deploy;
 
 #define GEN_TEST_CASES(Tag, FixtureClass)                                                      \
   TEST_F(FixtureClass, test_rt_detr_##Tag##_correctness)                                       \
@@ -33,7 +31,7 @@ protected:
 
 #ifdef ENABLE_TENSORRT
 
-#include "trt_core/trt_core.h"
+#include "trt_core/trt_core.hpp"
 
 class RTDetr_TensorRT_Fixture : public BaseRTDetrFixture {
 public:
@@ -67,7 +65,7 @@ GEN_TEST_CASES(tensorrt, RTDetr_TensorRT_Fixture);
 
 #ifdef ENABLE_ORT
 
-#include "ort_core/ort_core.h"
+#include "ort_core/ort_core.hpp"
 
 class RTDetr_OnnxRuntime_Fixture : public BaseRTDetrFixture {
 public:

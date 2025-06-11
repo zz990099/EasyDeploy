@@ -1,22 +1,15 @@
-/*
- * @Description:
- * @Author: Teddywesside 18852056629@163.com
- * @Date: 2024-12-02 18:58:26
- * @LastEditTime: 2024-12-02 19:09:02
- * @FilePath: /easy_deploy/sam/sam_mobilesam/src/mobilesam_factory.cpp
- */
-#include "sam_mobilesam/mobilesam.h"
+#include "sam_mobilesam/mobilesam.hpp"
 
-namespace sam {
+namespace easy_deploy {
 
 struct SamParams {
-  std::shared_ptr<inference_core::BaseInferCoreFactory>         image_encoder_core_factory;
-  std::shared_ptr<inference_core::BaseInferCoreFactory>         mask_points_decoder_core_factory;
-  std::shared_ptr<inference_core::BaseInferCoreFactory>         mask_boxes_decoder_core_factory;
-  std::shared_ptr<detection_2d::BaseDetectionPreprocessFactory> image_preprocess_block_factory;
-  std::vector<std::string>                                      encoder_blob_names;
-  std::vector<std::string>                                      box_dec_blob_names;
-  std::vector<std::string>                                      point_dec_blob_names;
+  std::shared_ptr<BaseInferCoreFactory>           image_encoder_core_factory;
+  std::shared_ptr<BaseInferCoreFactory>           mask_points_decoder_core_factory;
+  std::shared_ptr<BaseInferCoreFactory>           mask_boxes_decoder_core_factory;
+  std::shared_ptr<BaseDetectionPreprocessFactory> image_preprocess_block_factory;
+  std::vector<std::string>                        encoder_blob_names;
+  std::vector<std::string>                        box_dec_blob_names;
+  std::vector<std::string>                        point_dec_blob_names;
 };
 
 class SamMobileSamFactory : public BaseSamFactory {
@@ -24,7 +17,7 @@ public:
   SamMobileSamFactory(const SamParams &params) : params_(params)
   {}
 
-  std::shared_ptr<sam::BaseSamModel> Create() override
+  std::shared_ptr<BaseSamModel> Create() override
   {
     return CreateMobileSamModel(params_.image_encoder_core_factory->Create(),
                                 params_.mask_points_decoder_core_factory->Create(),
@@ -39,13 +32,13 @@ private:
 };
 
 std::shared_ptr<BaseSamFactory> CreateSamMobileSamModelFactory(
-    std::shared_ptr<inference_core::BaseInferCoreFactory>         image_encoder_core_factory,
-    std::shared_ptr<inference_core::BaseInferCoreFactory>         mask_points_decoder_core_factory,
-    std::shared_ptr<inference_core::BaseInferCoreFactory>         mask_boxes_decoder_core_factory,
-    std::shared_ptr<detection_2d::BaseDetectionPreprocessFactory> image_preprocess_block_factory,
-    const std::vector<std::string>                               &encoder_blob_names,
-    const std::vector<std::string>                               &box_dec_blob_names,
-    const std::vector<std::string>                               &point_dec_blob_names)
+    std::shared_ptr<BaseInferCoreFactory>           image_encoder_core_factory,
+    std::shared_ptr<BaseInferCoreFactory>           mask_points_decoder_core_factory,
+    std::shared_ptr<BaseInferCoreFactory>           mask_boxes_decoder_core_factory,
+    std::shared_ptr<BaseDetectionPreprocessFactory> image_preprocess_block_factory,
+    const std::vector<std::string>                 &encoder_blob_names,
+    const std::vector<std::string>                 &box_dec_blob_names,
+    const std::vector<std::string>                 &point_dec_blob_names)
 {
   if (image_encoder_core_factory == nullptr || mask_points_decoder_core_factory == nullptr ||
       mask_boxes_decoder_core_factory == nullptr || image_preprocess_block_factory == nullptr)
@@ -66,4 +59,4 @@ std::shared_ptr<BaseSamFactory> CreateSamMobileSamModelFactory(
   return std::make_shared<SamMobileSamFactory>(params);
 }
 
-} // namespace sam
+} // namespace easy_deploy

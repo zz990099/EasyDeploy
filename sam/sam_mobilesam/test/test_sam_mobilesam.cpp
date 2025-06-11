@@ -1,13 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "detection_2d_util/detection_2d_util.h"
-#include "sam_mobilesam/mobilesam.h"
+#include "detection_2d_util/detection_2d_util.hpp"
+#include "sam_mobilesam/mobilesam.hpp"
 #include "test_utils/sam_test_utils.hpp"
 
-using namespace inference_core;
-using namespace detection_2d;
-using namespace sam;
-using namespace test_utils;
+using namespace easy_deploy;
 
 #define GEN_MOBILESAM_TEST_CASES(Tag, FixtureClass)                                             \
   TEST_F(FixtureClass, test_mobilesam_##Tag##_correctness_with_points)                          \
@@ -72,7 +69,7 @@ protected:
 
 #ifdef ENABLE_TENSORRT
 
-#include "trt_core/trt_core.h"
+#include "trt_core/trt_core.hpp"
 
 class Sam_TensorRT_Fixture : public BaseSamFixture {
 public:
@@ -145,7 +142,7 @@ GEN_NANOSAM_TEST_CASES(tensorrt, Sam_TensorRT_Fixture);
 
 #ifdef ENABLE_ORT
 
-#include "ort_core/ort_core.h"
+#include "ort_core/ort_core.hpp"
 
 class Sam_OnnxRuntime_Fixture : public BaseSamFixture {
 public:
@@ -219,7 +216,7 @@ GEN_NANOSAM_TEST_CASES(onnxruntime, Sam_OnnxRuntime_Fixture);
 
 #ifdef ENABLE_RKNN
 
-#include "rknn_core/rknn_core.h"
+#include "rknn_core/rknn_core.hpp"
 
 class Sam_Rknn_Fixture : public BaseSamFixture {
 public:

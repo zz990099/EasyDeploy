@@ -1,24 +1,24 @@
-#include "detection_2d_rt_detr/rt_detr.h"
+#include "detection_2d_rt_detr/rt_detr.hpp"
 
-namespace detection_2d {
+namespace easy_deploy {
 
 class RTDetrDetection : public BaseDetectionModel {
 public:
-  RTDetrDetection(const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
-                  const std::shared_ptr<IDetectionPreProcess>          &preprocess_block,
-                  const int                                             input_height,
-                  const int                                             input_width,
-                  const int                                             input_channel,
-                  const int                                             cls_number,
-                  const std::vector<std::string>                       &input_blobs_name,
-                  const std::vector<std::string>                       &output_blobs_name);
+  RTDetrDetection(const std::shared_ptr<BaseInferCore>        &infer_core,
+                  const std::shared_ptr<IDetectionPreProcess> &preprocess_block,
+                  const int                                    input_height,
+                  const int                                    input_width,
+                  const int                                    input_channel,
+                  const int                                    cls_number,
+                  const std::vector<std::string>              &input_blobs_name,
+                  const std::vector<std::string>              &output_blobs_name);
 
   ~RTDetrDetection() = default;
 
 private:
-  bool PreProcess(std::shared_ptr<async_pipeline::IPipelinePackage> pipeline_unit) override;
+  bool PreProcess(std::shared_ptr<IPipelinePackage> pipeline_unit) override;
 
-  bool PostProcess(std::shared_ptr<async_pipeline::IPipelinePackage> pipeline_unit) override;
+  bool PostProcess(std::shared_ptr<IPipelinePackage> pipeline_unit) override;
 
 private:
   const std::vector<std::string> input_blobs_name_;
@@ -28,11 +28,11 @@ private:
   const int                      input_channel_;
   const int                      cls_number_;
 
-  const std::shared_ptr<inference_core::BaseInferCore> infer_core_;
-  std::shared_ptr<IDetectionPreProcess>                preprocess_block_;
+  const std::shared_ptr<BaseInferCore>  infer_core_;
+  std::shared_ptr<IDetectionPreProcess> preprocess_block_;
 };
 
-RTDetrDetection::RTDetrDetection(const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
+RTDetrDetection::RTDetrDetection(const std::shared_ptr<BaseInferCore>        &infer_core,
                                  const std::shared_ptr<IDetectionPreProcess> &preprocess_block,
                                  const int                                    input_height,
                                  const int                                    input_width,
@@ -54,9 +54,8 @@ RTDetrDetection::RTDetrDetection(const std::shared_ptr<inference_core::BaseInfer
   auto blobs_tensor = infer_core_->AllocBlobsBuffer();
   if (blobs_tensor->Size() != input_blobs_name_.size() + output_blobs_name_.size())
   {
-    LOG(ERROR) << "[RTDetrDetection] Infer core should has {"
-               << input_blobs_name_.size() + output_blobs_name_.size() << "} blobs !"
-               << " but got " << blobs_tensor->Size() << " blobs";
+    LOG_ERROR("[RTDetrDetection] Infer core should has {%ld} blobs, but got {%ld} blobs",
+              input_blobs_name_.size() + output_blobs_name_.size(), blobs_tensor->Size());
     throw std::runtime_error(
         "[RTDetrDetection] Construction Failed!!! Got invalid blobs_num size!!!");
   }
@@ -72,7 +71,7 @@ RTDetrDetection::RTDetrDetection(const std::shared_ptr<inference_core::BaseInfer
   }
 }
 
-bool RTDetrDetection::PreProcess(std::shared_ptr<async_pipeline::IPipelinePackage> _package)
+bool RTDetrDetection::PreProcess(std::shared_ptr<IPipelinePackage> _package)
 {
   auto package = std::dynamic_pointer_cast<DetectionPipelinePackage>(_package);
   CHECK_STATE(package != nullptr,
@@ -89,7 +88,7 @@ bool RTDetrDetection::PreProcess(std::shared_ptr<async_pipeline::IPipelinePackag
   return true;
 }
 
-bool RTDetrDetection::PostProcess(std::shared_ptr<async_pipeline::IPipelinePackage> _package)
+bool RTDetrDetection::PostProcess(std::shared_ptr<IPipelinePackage> _package)
 {
   auto package = std::dynamic_pointer_cast<DetectionPipelinePackage>(_package);
   CHECK_STATE(package != nullptr,
@@ -135,18 +134,18 @@ bool RTDetrDetection::PostProcess(std::shared_ptr<async_pipeline::IPipelinePacka
 }
 
 std::shared_ptr<BaseDetectionModel> CreateRTDetrDetectionModel(
-    const std::shared_ptr<inference_core::BaseInferCore> &infer_core,
-    const std::shared_ptr<IDetectionPreProcess>          &preprocess_block,
-    const int                                             input_height,
-    const int                                             input_width,
-    const int                                             input_channel,
-    const int                                             cls_number,
-    const std::vector<std::string>                       &input_blobs_name,
-    const std::vector<std::string>                       &output_blobs_name)
+    const std::shared_ptr<BaseInferCore>        &infer_core,
+    const std::shared_ptr<IDetectionPreProcess> &preprocess_block,
+    const int                                    input_height,
+    const int                                    input_width,
+    const int                                    input_channel,
+    const int                                    cls_number,
+    const std::vector<std::string>              &input_blobs_name,
+    const std::vector<std::string>              &output_blobs_name)
 {
   return std::make_shared<RTDetrDetection>(infer_core, preprocess_block, input_height, input_width,
                                            input_channel, cls_number, input_blobs_name,
                                            output_blobs_name);
 }
 
-} // namespace detection_2d
+} // namespace easy_deploy
