@@ -4,6 +4,10 @@ echo "Converting yolov8 ..."
                               --saveEngine=/workspace/models/yolov8n.engine \
                               --fp16
 
+echo "Converting yolo26 ..."
+/usr/src/tensorrt/bin/trtexec --onnx=/workspace/models/yolo26n.onnx \
+                              --saveEngine=/workspace/models/yolo26n.engine
+
 echo "Converting rt_detr_v2 ..."
 /usr/src/tensorrt/bin/trtexec --onnx=/workspace/models/rt_detr_v2_single_input.onnx \
                               --saveEngine=/workspace/models/rt_detr_v2_single_input.engine
